@@ -1,0 +1,4 @@
+*.p12
+assets/
+build/
+release/
