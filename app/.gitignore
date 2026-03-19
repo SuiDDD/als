@@ -1,4 +1,5 @@
 *.p12
 assets/
 build/
+libs/
 release/

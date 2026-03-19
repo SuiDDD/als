@@ -1,5 +1,4 @@
 package sui.k.als
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,10 +18,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import sui.k.als.boot.BootScreen
 import sui.k.als.boot.Splash
 import sui.k.als.tty.TTYScreen
-import java.io.File
-
 val localAppFont = staticCompositionLocalOf<FontFamily> { FontFamily.Default }
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,15 +30,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             var switch by rememberSaveable { mutableStateOf("splash") }
             CompositionLocalProvider(localAppFont provides remember {
-                runCatching { FontFamily(Font("fonts/GoogleSansFlex.ttf", assets)) }.getOrDefault(
-                    FontFamily.Default
-                )
+                runCatching { FontFamily(Font("fonts/GoogleSansFlex.ttf", assets)) }.getOrDefault(FontFamily.Default)
             }) {
                 when (switch) {
-                    "splash" -> Splash(onTimeout = {
-                        switch = if (File("/data/als/dev").exists()) "terminal" else "boot"
-                    })
-
+                    "splash" -> Splash(onTimeout = { switch = "boot" })
                     "boot" -> BootScreen { switch = "terminal" }
                     else -> TTYScreen()
                 }
