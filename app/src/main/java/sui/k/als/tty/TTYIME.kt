@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -29,7 +28,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -62,41 +63,36 @@ private val symbolMap =
 
 @Composable
 fun TTYIME() {
+    val density = LocalDensity.current
+    val windowInfo = LocalWindowInfo.current
     val configuration = LocalConfiguration.current
-    val screenHeight = configuration.screenHeightDp.dp
+    val containerHeight = with(density) { windowInfo.containerSize.height.toDp() }
     val isLandscape =
         configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
-    val panelHeight = if (isLandscape) screenHeight / 2 else screenHeight / 3
-    if (!IMEState.isFullKeyboardVisible) 30.dp else panelHeight / 6
+    val panelHeight = if (isLandscape) containerHeight / 2 else containerHeight / 3
     BackHandler(IMEState.isFullKeyboardVisible) {
         if (IMEState.isFloating) IMEState.isFloating = false
         IMEState.isFullKeyboardVisible = false
     }
-    Box(
-        modifier = if (IMEState.isFloating) {
-            Modifier
-                .offset { IMEState.keyboardOffset }
-                .size(width = 270.dp, height = panelHeight)
-        } else {
-            Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-        }) {
+    Box(modifier = if (IMEState.isFloating) Modifier
+        .offset { IMEState.keyboardOffset }
+        .size(width = 360.dp, height = panelHeight) else Modifier
+        .fillMaxWidth()
+        .wrapContentHeight()) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.Black)
+                .background(Color.Black.copy(alpha = 0.70f))
         ) {
             if (!IMEState.isFullKeyboardVisible) Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(81.dp)
-                    .background(Color.Black)
+                    .height(90.dp)
             ) {
                 listOf(
-                    listOf("Ctrl", "Alt", "Shift", "Esc", "", "Tab", "F1", "F2", "F3"),
-                    listOf("F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"),
-                    listOf("Home", "End", "Del", "Back", "Enter", "↑", "↓", "←", "→")
+                    listOf("Esc", "F1", "F2", "F3", "·", "F4", "F5", "F6", "Del"),
+                    listOf("Shift", "F7", "F8", "F9", "↑", "F10", "F11", "F12", "Back"),
+                    listOf("Tab", "Ctrl", "Alt", "←", "↓", "→", "Home", "End", "Enter")
                 ).forEach { rowKeys ->
                     Row(
                         modifier = Modifier
@@ -106,17 +102,17 @@ fun TTYIME() {
                         rowKeys.forEach { keyLabel ->
                             KeyBase(
                                 label = keyLabel,
-                                width = 0.dp,
+                                width = null,
                                 weight = 1f,
                                 isModifier = keyLabel in listOf("Ctrl", "Alt", "Shift"),
-                                isControl = keyLabel == "",
+                                isControl = keyLabel == "·"
                             )
                         }
                     }
                 }
             } else {
                 val layout =
-                    "Esc·F1·F2·F3·F4·F5·F6··F7·F8·F9·F10·F11·F12·Del¦`·1·2·3·4·5·6·7·8·9·0·-·=·Back¦Tab·Q·W·E·R·T·Y·U·I·O·P·[·]·\\¦Caps·A·S·D·F·G·H·J·K·L·;·'·Enter¦Shift·Z·X·C·V·B·N·M·,·.·/·↑¦Ctrl·Alt·Home· ·End·←·↓·→".split(
+                    "Esc·F1·F2·F3·F4·F5·F6··F7·F8·F9·F10·F11·F12·Del¦`·1·2·3·4·5·6·7·8·9·0·-·=·Back¦Tab·Q·W·E·R·T·Y·U·I·O·P·[·]·\\¦Caps·A·S·D·F·G·H·J·K·L·;·'·Enter¦Shift·Z·X·C·V·B·N·M·,·.·↑·/¦Ctrl·Alt·Home· ·End·←·↓·→".split(
                         '¦'
                     ).map { it.split('·') }
                 Column(
@@ -130,13 +126,13 @@ fun TTYIME() {
                                 .fillMaxWidth()
                                 .weight(1f)
                         ) {
-                            row.forEachIndexed { index, label ->
-                                val keyWeight = when {
-                                    label == " " -> 2.4f; label == "→" -> 1.2f; index == 0 || index == row.lastIndex -> 1.5f; else -> 0.9f
+                            row.forEach { label ->
+                                val kw = when (label) {
+                                    " " -> 3.9f; "Ctrl", "Alt", "Home", "End" -> 1.2f; else -> 1f
                                 }
                                 KeyBase(
                                     label,
-                                    weight = keyWeight,
+                                    weight = kw,
                                     width = null,
                                     isModifier = label in listOf("Ctrl", "Shift", "Alt", "Caps"),
                                     isControl = label == ""
@@ -162,6 +158,10 @@ private fun RowScope.KeyBase(
     val coroutineScope = rememberCoroutineScope()
     var repeatJob by remember { mutableStateOf<Job?>(null) }
     val view = LocalView.current
+    val isActive = when (label) {
+        "Ctrl" -> IMEState.isCtrlActive; "Shift" -> IMEState.isShiftActive; "Alt" -> IMEState.isAltActive; "Caps" -> IMEState.isCapsActive; else -> false
+    }
+    val contentColor = if (isPressed || isActive) Color(0xFFE95420) else Color.White
     val displayText = when {
         isControl -> ""
         isModifier || label.length > 1 || (!label[0].isLetter() && !symbolMap.containsKey(label)) -> label
@@ -169,29 +169,22 @@ private fun RowScope.KeyBase(
         IMEState.isCapsActive && label[0].isLetter() -> label.uppercase()
         else -> label
     }
-    val isActive = when (label) {
-        "Ctrl" -> IMEState.isCtrlActive
-        "Shift" -> IMEState.isShiftActive
-        "Alt" -> IMEState.isAltActive
-        "Caps" -> IMEState.isCapsActive
-        else -> false
-    }
     Box(
         modifier = (if (weight != null) Modifier.weight(weight) else if (width != null) Modifier.width(
-            width
-        ) else Modifier)
+        width
+    ) else Modifier)
             .fillMaxHeight()
             .pointerInput(label) {
                 if (isControl) {
                     detectDragGestures(onDragStart = {
                         if (IMEState.isFullKeyboardVisible) {
-                            IMEState.isFloating = true
-                            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                            IMEState.isFloating = true; view.performHapticFeedback(
+                                HapticFeedbackConstants.LONG_PRESS
+                            )
                         }
                     }, onDrag = { change, dragAmount ->
                         if (IMEState.isFloating) {
-                            change.consume()
-                            IMEState.keyboardOffset += IntOffset(
+                            change.consume(); IMEState.keyboardOffset += IntOffset(
                                 dragAmount.x.roundToInt(), dragAmount.y.roundToInt()
                             )
                         }
@@ -199,54 +192,49 @@ private fun RowScope.KeyBase(
                 }
             }
             .pointerInput(label) {
-                detectTapGestures(
-                    onPress = {
-                        isPressed = true
-                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                        val startTime = System.currentTimeMillis()
-                        if (isControl) {
-                            try {
-                                awaitRelease()
-                                IMEState.isFullKeyboardVisible = !IMEState.isFullKeyboardVisible
-                                if (!IMEState.isFullKeyboardVisible) {
-                                    IMEState.isFloating = false
-                                    IMEState.keyboardOffset = IntOffset(0, 0)
-                                }
-                            } finally {
-                                isPressed = false
+                detectTapGestures(onPress = {
+                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                    val startTime = System.currentTimeMillis()
+                    if (isControl) {
+                        try {
+                            awaitRelease()
+                            IMEState.isFullKeyboardVisible = !IMEState.isFullKeyboardVisible
+                            if (!IMEState.isFullKeyboardVisible) {
+                                IMEState.isFloating = false; IMEState.keyboardOffset =
+                                    IntOffset(0, 0)
                             }
-                        } else {
-                            repeatJob = coroutineScope.launch {
-                                if (isModifier) {
-                                    when (label) {
-                                        "Ctrl" -> IMEState.isCtrlActive = !IMEState.isCtrlActive
-                                        "Shift" -> IMEState.isShiftActive = !IMEState.isShiftActive
-                                        "Alt" -> IMEState.isAltActive = !IMEState.isAltActive
-                                        "Caps" -> IMEState.isCapsActive = !IMEState.isCapsActive
-                                    }
-                                } else {
+                        } finally {
+                        }
+                    } else {
+                        repeatJob = coroutineScope.launch {
+                            if (isModifier) {
+                                when (label) {
+                                    "Ctrl" -> IMEState.isCtrlActive =
+                                        !IMEState.isCtrlActive; "Shift" -> IMEState.isShiftActive =
+                                    !IMEState.isShiftActive; "Alt" -> IMEState.isAltActive =
+                                    !IMEState.isAltActive; "Caps" -> IMEState.isCapsActive =
+                                    !IMEState.isCapsActive
+                                }
+                            } else {
+                                processKey(label)
+                                delay(300L)
+                                while (true) {
                                     processKey(label)
-                                    delay(300L)
-                                    while (true) {
-                                        processKey(label)
-                                        val duration = System.currentTimeMillis() - startTime
-                                        delay(if (duration < 3000) 30L else 9L)
-                                    }
+                                    val duration =
+                                        System.currentTimeMillis() - startTime; delay(if (duration < 3000) 35L else 12L)
                                 }
-                            }
-                            try {
-                                awaitRelease()
-                            } finally {
-                                isPressed = false
-                                repeatJob?.cancel()
                             }
                         }
-                    })
+                        try {
+                            awaitRelease()
+                        } finally {
+                            repeatJob?.cancel()
+                        }
+                    }
+                })
             }
-            .padding(1.dp)
-            .background(if (isPressed || isActive) Color(0xFF444444) else Color(0xFF1A1A1A)),
-        contentAlignment = Alignment.Center) {
-        Text(displayText, color = Color.White, fontSize = 9.sp, softWrap = false)
+            .background(Color.Transparent), contentAlignment = Alignment.Center) {
+        Text(displayText, color = contentColor, fontSize = 12.sp, softWrap = false)
     }
 }
 

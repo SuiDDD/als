@@ -5,26 +5,12 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.Typeface
 import android.os.Build
-import android.view.Choreographer
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,6 +27,12 @@ import java.io.File
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
+data class TTYInstance(
+    val session: TerminalSession,
+    val view: TerminalView,
+    val initialized: AtomicBoolean = AtomicBoolean(false)
+)
+
 val LocalSession = staticCompositionLocalOf<TerminalSession?> { null }
 internal var ttySession: TerminalSession? = null
 private val io = Executors.newSingleThreadExecutor { r ->
@@ -52,180 +44,117 @@ fun cmd(s: String) {
 }
 
 @Composable
-fun TTYScreen() {
+fun TTYScreen(instance: TTYInstance) {
     val ctx = LocalContext.current
     val den = LocalDensity.current
-    val view = remember { TerminalView(ctx, null) }
-    val dirty = remember { AtomicBoolean(false) }
+    val view = instance.view
+    val session = instance.session
     var imePx by remember { mutableIntStateOf(0) }
     val imeHeight = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
-    val policies = remember {
-        File("/sys/devices/system/cpu/cpufreq/").listFiles { f -> f.name.startsWith("policy") }
-            ?: emptyArray()
-    }
-    val cpuMask = remember {
-        try {
-            val count = File("/sys/devices/system/cpu/present").readText().split("-").last().trim()
-                .toInt() + 1
-            Integer.toHexString((1 shl count) - 1)
-        } catch (_: Exception) {
-            "ff"
-        }
-    }
-    val session = remember {
-        val dir = ctx.filesDir.absolutePath.also { File(it).mkdirs() }
-        TerminalSession(
-            "/system/bin/sh", dir, arrayOf("-i"), arrayOf(
-                "TERM=xterm-256color",
-                "HOME=$dir",
-                "LANG=en_US.UTF-8",
-                "PATH=/system/bin:/system/xbin:/data/als"
-            ), 500000, object : TTYSessionStub() {
-                override fun onTextChanged(s: TerminalSession) = dirty.lazySet(true)
-                override fun onCopyTextToClipboard(s: TerminalSession, t: String) {
-                    (ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(
-                        ClipData.newPlainText("T", t)
-                    )
-                }
 
-                override fun onPasteTextFromClipboard(s: TerminalSession?) {
-                    val clip = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    clip.primaryClip?.getItemAt(0)?.let { item ->
-                        val text = item.coerceToText(ctx).toString()
-                        io.execute { s?.write(text) }
-                    }
-                }
-            })
-    }
-    DisposableEffect(Unit) {
-        val chro = Choreographer.getInstance()
-        var last = System.currentTimeMillis()
-        var burst = false
-        val loop = object : Choreographer.FrameCallback {
-            override fun doFrame(nanos: Long) {
-                val now = System.currentTimeMillis()
-                if (dirty.compareAndSet(true, false)) {
-                    last = now
-                    view.invalidate()
-                    view.onScreenUpdated()
-                    if (!burst) {
-                        burst = true
-                        io.execute {
-                            try {
-                                val run = mutableListOf<String>()
-                                policies.forEach { run.add("echo performance > ${it.absolutePath}/scaling_governor") }
-                                run.add($$"taskset -p $$cpuMask $(pgrep -f als-io)")
-                                Runtime.getRuntime()
-                                    .exec(arrayOf("su", "-c", run.joinToString(" && ")))
-                            } catch (_: Exception) {
-                            }
-                        }
-                    }
-                } else if (burst && (now - last > 3000)) {
-                    burst = false
-                    io.execute {
-                        try {
-                            val run = mutableListOf<String>()
-                            policies.forEach { run.add("echo schedutil > ${it.absolutePath}/scaling_governor") }
-                            Runtime.getRuntime().exec(arrayOf("su", "-c", run.joinToString(" && ")))
-                        } catch (_: Exception) {
-                        }
-                    }
-                }
-                chro.postFrameCallback(this)
-            }
-        }
-        chro.postFrameCallback(loop)
-        onDispose {
-            chro.removeFrameCallback(loop)
-            io.execute {
-                try {
-                    val run = mutableListOf<String>()
-                    policies.forEach { run.add("echo schedutil > ${it.absolutePath}/scaling_governor") }
-                    Runtime.getRuntime().exec(arrayOf("su", "-c", run.joinToString(" && ")))
-                } catch (_: Exception) {
-                }
-            }
-        }
-    }
-    val client = remember {
-        object : TTYViewStub() {
-            private var size = 18f
-            override fun onScale(f: Float): Float {
-                size *= f
-                view.post { view.setTextSize(size.toInt()) }
-                return 1f
-            }
-
-            override fun onSingleTapUp(e: MotionEvent) {
-                view.requestFocus()
-                view.postDelayed({
-                    val imm =
-                        ctx.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    imm.showSoftInput(view, 0)
-                }, 50)
-            }
-        }
-    }
-    LaunchedEffect(session) {
+    LaunchedEffect(instance) {
         ttySession = session
-        cmd("su -M")
-        cmd("cd /data/als && clear && busybox")
-    }
-    DisposableEffect(session) {
-        view.apply {
-            if (Build.VERSION.SDK_INT >= 29) isForceDarkAllowed = false
-            setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
-            isFocusable = true
-            isFocusableInTouchMode = true
-            requestFocus()
-            setTextSize(18)
-            setTypeface(
-                try {
-                    Typeface.createFromAsset(ctx.assets, "fonts/GoogleSansCode.ttf")
-                } catch (_: Exception) {
-                    Typeface.MONOSPACE
-                }
-            )
-            setBackgroundColor(android.graphics.Color.BLACK)
-            setTerminalViewClient(client)
-            attachSession(session)
+        if (instance.initialized.compareAndSet(false, true)) {
+            cmd("su -M")
+            cmd("cd /data/als && clear && busybox")
         }
-        onDispose {
-            io.execute { session.finishIfRunning() }
-            if (ttySession == session) ttySession = null
+        view.requestFocus()
+        view.post {
+            view.onScreenUpdated()
+            view.invalidate()
         }
     }
+
     CompositionLocalProvider(LocalSession provides session) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black)
-        ) {
+        Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
             AndroidView(
                 factory = { view },
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = if (IMEState.isFloating) 0.dp else imeHeight + with(den) { imePx.toDp() })
+                    .padding(bottom = if (IMEState.isFloating) 0.dp else imeHeight + with(den) { imePx.toDp() }),
+                update = {
+                    it.onScreenUpdated()
+                }
             )
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = imeHeight)
-                    .onGloballyPositioned { imePx = it.size.height }) { TTYIME() }
+                    .onGloballyPositioned { imePx = it.size.height }
+            ) { TTYIME() }
         }
     }
 }
 
+fun createTTYInstance(ctx: Context, sessionClient: TTYSessionStub, viewClient: TTYViewStub): TTYInstance {
+    val dir = ctx.filesDir.absolutePath.also { File(it).mkdirs() }
+    
+    val session = TerminalSession(
+        "/system/bin/sh", dir, arrayOf("-i"), arrayOf(
+            "TERM=xterm-256color",
+            "HOME=$dir",
+            "LANG=en_US.UTF-8",
+            "PATH=/system/bin:/system/xbin:/data/als"
+        ), 500000, sessionClient
+    )
+
+    val view = TerminalView(ctx, null).apply {
+        if (Build.VERSION.SDK_INT >= 29) isForceDarkAllowed = false
+        setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
+        isFocusable = true
+        isFocusableInTouchMode = true
+        setTextSize(18)
+        setTypeface(try {
+            Typeface.createFromAsset(ctx.assets, "fonts/GoogleSansCode.ttf")
+        } catch (_: Exception) {
+            Typeface.MONOSPACE
+        })
+        setBackgroundColor(android.graphics.Color.BLACK)
+        setTerminalViewClient(viewClient)
+        attachSession(session)
+    }
+
+    sessionClient.bindView(view)
+
+    return TTYInstance(session, view)
+}
+
 open class TTYSessionStub : TerminalSessionClient {
-    override fun onTextChanged(s: TerminalSession) {}
+    private var boundView: TerminalView? = null
+
+    fun bindView(view: TerminalView) {
+        boundView = view
+    }
+
+    override fun onTextChanged(s: TerminalSession) {
+        boundView?.let { v ->
+            v.post {
+                v.onScreenUpdated()
+                v.invalidate()
+            }
+        }
+    }
+
     override fun onTitleChanged(s: TerminalSession) {}
     override fun onSessionFinished(s: TerminalSession) {}
-    override fun onCopyTextToClipboard(s: TerminalSession, t: String) {}
-    override fun onPasteTextFromClipboard(s: TerminalSession?) {}
+    override fun onCopyTextToClipboard(s: TerminalSession, t: String) {
+        val ctx = boundView?.context ?: return
+        val clip = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        clip.setPrimaryClip(ClipData.newPlainText("T", t))
+    }
+    override fun onPasteTextFromClipboard(s: TerminalSession?) {
+        val ctx = boundView?.context ?: return
+        val clip = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        clip.primaryClip?.getItemAt(0)?.let { item ->
+            val text = item.coerceToText(ctx).toString()
+            io.execute { s?.write(text) }
+        }
+    }
     override fun onBell(s: TerminalSession) {}
     override fun onColorsChanged(s: TerminalSession) {}
-    override fun onTerminalCursorStateChange(b: Boolean) {}
+    override fun onTerminalCursorStateChange(b: Boolean) {
+        boundView?.post { boundView?.onScreenUpdated() }
+    }
     override fun getTerminalCursorStyle() = 2
     override fun setTerminalShellPid(s: TerminalSession, p: Int) {}
     override fun logError(t: String, m: String) {}
