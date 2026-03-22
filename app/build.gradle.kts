@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId = "sui.k.als"
-        minSdk = 24
+        minSdk = 33
         targetSdk = 37
         versionCode = 1
         versionName = "3.0.3"
