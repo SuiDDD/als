@@ -32,7 +32,7 @@ import com.termux.terminal.TerminalSession
 import com.termux.terminal.TerminalSessionClient
 import com.termux.view.TerminalView
 import com.termux.view.TerminalViewClient
-import kotlinx.coroutines.delay
+import sui.k.als.boot.alsPath
 import sui.k.als.boot.su
 import java.io.File
 import java.util.concurrent.Executors
@@ -67,8 +67,7 @@ fun TTYScreen(instance: TTYInstance) {
         ttySession = session
         if (instance.initialized.compareAndSet(false, true)) {
             cmd("$su -M")
-            delay(180)
-            cmd($$"export PS1=$'\\033[01;32m$(whoami)@$(getprop ro.product.model)\\033[00m:\\033[01;34m${PWD}\\033[00m# ' && cd /data/als && clear && busybox")
+            cmd($$"export PS1=$'\\033[01;32m$(whoami)@$(getprop ro.product.model)\\033[00m:\\033[01;34m${PWD}\\033[00m# ' && cd $$alsPath && clear && busybox")
         }
         view.requestFocus()
         view.post { view.onScreenUpdated(); view.invalidate() }
@@ -103,8 +102,8 @@ fun createTTYInstance(
             "TERM=xterm-256color",
             "HOME=$dir",
             "LANG=en_US.UTF-8",
-            "PATH=/system/bin:/system/xbin:/data/als"
-        ), 500000, sessionClient
+            "PATH=/system/bin:/system/xbin:$alsPath"
+        ), 300000, sessionClient
     )
     val view = TerminalView(ctx, null).apply {
         isForceDarkAllowed = false

@@ -53,6 +53,8 @@ import sui.k.als.tty.createTTYInstance
 import java.io.File
 import java.io.FileOutputStream
 
+const val alsPath = "/data/local/tmp/als/"
+
 @Composable
 fun BootScreen(onFinished: () -> Unit) {
     val ctx = LocalContext.current
@@ -65,13 +67,15 @@ fun BootScreen(onFinished: () -> Unit) {
     var lastVolClick by remember { mutableLongStateOf(0L) }
     var systemMenuBg by remember { mutableStateOf(Color.Transparent) }
     val ubuntuOrange = Color(0xFFE95420)
-    val targetPath = "/data/local/tmp/als"
+    val menuSys = stringResource(R.string.menu_system)
+    val menuSession = stringResource(R.string.menu_session)
+    val menuExit = stringResource(R.string.menu_exit)
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
             val infoCmd =
                 "echo \"$(uname -m)\\n$(/system/bin/getenforce)\\n$(df /data | awk 'NR==2 {printf \"%.2f GB\", $4/1024/1024}') Free\\n$(cat /sys/class/power_supply/battery/capacity)%\\n$(uname -r)\""
             systemInfo = try {
-                ProcessBuilder(su, "-c", infoCmd).start().inputStream.bufferedReader().readText()
+                ProcessBuilder("su", "-c", infoCmd).start().inputStream.bufferedReader().readText()
             } catch (_: Exception) {
                 "ROOT_ERR"
             }
@@ -103,20 +107,20 @@ fun BootScreen(onFinished: () -> Unit) {
             )
         }, content = {
             Column(modifier = Modifier.fillMaxSize()) {
-                MenuLine(stringResource(R.string.menu_system), font, systemMenuBg) {
+                MenuLine(menuSys, font, systemMenuBg) {
                     scope.launch(Dispatchers.IO) {
                         val hasGunyah = ProcessBuilder(
-                            su, "-c", "[ -e /dev/gunyah ] && echo 1 || echo 0"
+                            "su", "-c", "[ -e /dev/gunyah ] && echo 1 || echo 0"
                         ).start().inputStream.bufferedReader().readText().trim() == "1"
                         if (!hasGunyah) {
                             systemMenuBg = Color.Red; return@launch
                         }
                         val exists = ProcessBuilder(
-                            su, "-c", "[ -f $targetPath/i ] && echo 1 || echo 0"
+                            "su", "-c", "[ -f ${alsPath}i ] && echo 1 || echo 0"
                         ).start().inputStream.bufferedReader().readText().trim() == "1"
                         if (!exists) {
                             ProcessBuilder(
-                                su, "-c", "mkdir -p $targetPath && chmod 777 $targetPath"
+                                "su", "-c", "mkdir -p $alsPath && chmod 777 $alsPath"
                             ).start().waitFor()
                             listOf("busybox", "01.tar.xz").forEach { name ->
                                 val tmp = File(ctx.cacheDir, name)
@@ -126,14 +130,14 @@ fun BootScreen(onFinished: () -> Unit) {
                                     }
                                 }
                                 ProcessBuilder(
-                                    su,
+                                    "su",
                                     "-c",
-                                    "cp ${tmp.absolutePath} $targetPath/$name && chmod 755 $targetPath/$name"
+                                    "cp ${tmp.absolutePath} $alsPath$name && chmod 755 $alsPath$name"
                                 ).start().waitFor()
                                 tmp.delete()
                             }
                             ProcessBuilder(
-                                su, "-c", "cd $targetPath && ./busybox tar -xJf 01.tar.xz"
+                                "su", "-c", "cd $alsPath && ./busybox tar -xJf 01.tar.xz"
                             ).start().waitFor()
                         }
                         withContext(Dispatchers.Main) {
@@ -148,14 +152,14 @@ fun BootScreen(onFinished: () -> Unit) {
                                         )
                                     }
                                 })
-                            sessions.add("SYS" to instance)
+                            sessions.add(menuSys to instance)
                             activeSession = instance
                             showTTY = true
-                            scope.launch { delay(180); cmd("cd $targetPath && ./i\n") }
+                            scope.launch { delay(180); cmd("clear && cd $alsPath && ./i") }
                         }
                     }
                 }
-                MenuLine(stringResource(R.string.menu_session), font, Color.Transparent) {
+                MenuLine(menuSession, font, Color.Transparent) {
                     val instance = createTTYInstance(
                         ctx,
                         object : TTYSessionStub() {},
@@ -167,7 +171,7 @@ fun BootScreen(onFinished: () -> Unit) {
                                 )
                             }
                         })
-                    sessions.add("TTY#${sessions.size}" to instance)
+                    sessions.add("$menuSession#${sessions.size}" to instance)
                     activeSession = instance
                     showTTY = true
                 }
@@ -203,7 +207,7 @@ fun BootScreen(onFinished: () -> Unit) {
                         }
                     }
                 }
-                MenuLine(stringResource(R.string.menu_exit), font, Color.Transparent) {
+                MenuLine(menuExit, font, Color.Transparent) {
                     sessions.forEach { it.second.session.finishIfRunning() }
                     onFinished()
                     (ctx as? Activity)?.finishAffinity()
