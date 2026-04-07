@@ -10,7 +10,7 @@ android {
         applicationId = "sui.k.als"
         minSdk = 33
         targetSdk = 37
-        versionCode = 7
+        versionCode = 8
         versionName = "26.4.7"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
