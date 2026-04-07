@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">ALS</string>
+    <string name="menu_system">系统</string>
+    <string name="menu_session">会话</string>
+    <string name="menu_exit">退出</string>
+</resources>
