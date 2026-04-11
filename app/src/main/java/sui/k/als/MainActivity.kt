@@ -1,5 +1,4 @@
 package sui.k.als
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,11 +15,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import sui.k.als.boot.BootScreen
+import sui.k.als.boot.Home
 import sui.k.als.boot.Splash
-
 val localAppFont = staticCompositionLocalOf<FontFamily> { FontFamily.Default }
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,8 +34,8 @@ class MainActivity : ComponentActivity() {
                 )
             }) {
                 when (switch) {
-                    "splash" -> Splash(onTimeout = { switch = "boot" })
-                    "boot" -> BootScreen { finish() }
+                    "splash" -> Splash(onTimeout = { switch = "home" })
+                    "home" -> Home { finish() }
                 }
             }
         }

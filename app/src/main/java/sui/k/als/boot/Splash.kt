@@ -80,7 +80,7 @@ fun Splash(
     Column(
         modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(Color.White)
     ) {
         Box(
             Modifier
@@ -88,7 +88,7 @@ fun Splash(
                 .fillMaxWidth(), Alignment.BottomCenter
         ) {
             header()
-            Text("AndLinSys", color = Color.White, fontSize = 9.sp, fontFamily = font)
+            Text("AndLinSys", color = Color.Black, fontSize = 9.sp, fontFamily = font)
         }
         Column(
             Modifier
@@ -103,7 +103,7 @@ fun Splash(
                 .fillMaxWidth(), Arrangement.Center, Alignment.CenterHorizontally
         ) {
             Text("Powered by", color = Color.Gray, fontSize = 6.sp, fontFamily = font)
-            Text("Ubuntu", color = Color.White, fontSize = 9.sp, fontFamily = font)
+            Text("Gunyah", color = Color.Black, fontSize = 9.sp, fontFamily = font)
         }
     }
 }
