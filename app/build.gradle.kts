@@ -46,6 +46,7 @@ dependencies {
     implementation(libs.termux.app)
     implementation(libs.guava.listenablefuture)
     implementation(libs.androidx.compose.ui.unit)
+    implementation(libs.androidx.compose.material.icons.extended)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -1,30 +1,37 @@
 package sui.k.als.vm
-
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import sui.k.als.R
 import sui.k.als.localAppFont
-
 @Composable
 fun VM() {
     val font = localAppFont.current
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "这是配置界面",
-            color = Color.Black,
-            fontSize = 14.sp,
-            fontFamily = font
-        )
+    var showCreateScreen by remember { mutableStateOf(false) }
+    val accentColor = Color(0xFFE95420)
+    if (showCreateScreen) {
+        VMCreate(onBack = { showCreateScreen = false })
+    } else {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Button(
+                onClick = { showCreateScreen = true },
+                colors = ButtonDefaults.buttonColors(containerColor = accentColor),
+                shape = RoundedCornerShape(9.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.label_add_vm),
+                    fontFamily = font,
+                    fontSize = 14.sp,
+                    color = Color.White
+                )
+            }
+        }
     }
 }
