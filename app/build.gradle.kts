@@ -10,8 +10,8 @@ android {
         applicationId = "sui.k.als"
         minSdk = 33
         targetSdk = 37
-        versionCode = 9
-        versionName = "26.4.11"
+        versionCode = 10
+        versionName = "26.4.13"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
