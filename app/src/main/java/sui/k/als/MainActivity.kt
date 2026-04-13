@@ -17,7 +17,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import sui.k.als.boot.Home
 import sui.k.als.boot.Splash
-val localAppFont = staticCompositionLocalOf<FontFamily> { FontFamily.Default }
+val localFont = staticCompositionLocalOf<FontFamily> { FontFamily.Default }
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             var switch by rememberSaveable { mutableStateOf("splash") }
-            CompositionLocalProvider(localAppFont provides remember {
+            CompositionLocalProvider(localFont provides remember {
                 runCatching { FontFamily(Font("fonts/GoogleSansFlex.ttf", assets)) }.getOrDefault(
                     FontFamily.Default
                 )

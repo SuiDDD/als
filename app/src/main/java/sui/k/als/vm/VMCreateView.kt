@@ -31,8 +31,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
@@ -51,11 +49,13 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import sui.k.als.localAppFont
+import sui.k.als.R
+import sui.k.als.localFont
 
 private val GlobalTextSize = 12.sp
 private val AccentColor = Color(0xFFE95420)
@@ -69,7 +69,7 @@ fun ExpressiveCanvas(
     onAction: () -> Unit,
     content: @Composable (Int) -> Unit
 ) {
-    val appFont = localAppFont.current
+    val localFont = localFont.current
     var activeIndex by remember { mutableIntStateOf(0) }
     Surface(color = BgGray) {
         Column(Modifier.fillMaxSize()) {
@@ -81,7 +81,7 @@ fun ExpressiveCanvas(
                 Arrangement.SpaceBetween,
                 Alignment.CenterVertically
             ) {
-                Text(title, fontSize = 16.sp, fontFamily = appFont)
+                Text(title, fontSize = 16.sp, fontFamily = localFont)
                 Surface(
                     Modifier
                         .size(38.dp)
@@ -91,10 +91,9 @@ fun ExpressiveCanvas(
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
-                            Icons.Default.Save,
-                            null,
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
+                            painter = painterResource(id = R.drawable.play_arrow_wght300_24px),
+                            contentDescription = null,
+                            tint = Color.White
                         )
                     }
                 }
@@ -129,7 +128,7 @@ fun ExpressiveCanvas(
                                     name,
                                     fontSize = GlobalTextSize,
                                     color = if (isSelected) AccentColor else Color(0xFF444444),
-                                    fontFamily = appFont
+                                    fontFamily = localFont
                                 )
                             }
                         }
@@ -167,7 +166,7 @@ fun ExpressiveCanvas(
                                 fontSize = 11.sp,
                                 letterSpacing = 0.5.sp,
                                 color = Color.Gray.copy(0.5f),
-                                fontFamily = appFont,
+                                fontFamily = localFont,
                                 modifier = Modifier.padding(bottom = 12.dp, start = 4.dp)
                             )
                             Surface(
@@ -198,13 +197,13 @@ fun InputCell(label: String, value: String, onValueChange: (String) -> Unit) {
         Text(
             label,
             fontSize = GlobalTextSize,
-            fontFamily = localAppFont.current,
+            fontFamily = localFont.current,
             modifier = Modifier.weight(1f)
         )
         BasicTextField(
             value, onValueChange, textStyle = TextStyle(
                 fontSize = GlobalTextSize,
-                fontFamily = localAppFont.current,
+                fontFamily = localFont.current,
                 textAlign = TextAlign.End,
                 color = AccentColor
             )
@@ -223,7 +222,7 @@ fun ToggleCell(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Un
         Text(
             label,
             fontSize = GlobalTextSize,
-            fontFamily = localAppFont.current,
+            fontFamily = localFont.current,
             modifier = Modifier.weight(1f)
         )
         Switch(

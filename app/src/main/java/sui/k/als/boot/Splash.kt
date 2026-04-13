@@ -34,7 +34,7 @@ import androidx.core.content.edit
 import androidx.core.graphics.drawable.toBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import sui.k.als.localAppFont
+import sui.k.als.localFont
 
 var suPath by mutableStateOf("su")
 val su get() = suPath
@@ -107,7 +107,7 @@ fun Splash(
                     onValueChange = { tempPath = it },
                     singleLine = true,
                     textStyle = TextStyle(
-                        color = Color.White, fontSize = 9.sp, fontFamily = localAppFont.current
+                        color = Color.White, fontSize = 9.sp, fontFamily = localFont.current
                     ),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = {

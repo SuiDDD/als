@@ -23,9 +23,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -42,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,8 +47,9 @@ import androidx.compose.ui.window.Dialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import sui.k.als.R
 import sui.k.als.boot.su
-import sui.k.als.localAppFont
+import sui.k.als.localFont
 import sui.k.als.tty.TTYInstance
 import sui.k.als.tty.TTYScreen
 import sui.k.als.tty.TTYSessionStub
@@ -69,7 +68,7 @@ data class VMConfig(
 @Composable
 fun VM(onExit: () -> Unit) {
     val context = LocalContext.current
-    val appFont = localAppFont.current
+    val localFont = localFont.current
     val scope = rememberCoroutineScope()
     val accent = Color(0xFFE95420)
     var configs by remember { mutableStateOf(listOf<VMConfig>()) }
@@ -127,7 +126,7 @@ fun VM(onExit: () -> Unit) {
                         "Select Engine",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = appFont
+                        fontFamily = localFont
                     )
                     Spacer(Modifier.height(16.dp))
                     TypeItem("QEMU Gunyah", null, true, accent) {
@@ -157,7 +156,7 @@ fun VM(onExit: () -> Unit) {
                 Text(
                     "Virtual Machines",
                     fontSize = 16.sp,
-                    fontFamily = appFont,
+                    fontFamily = localFont,
                     fontWeight = FontWeight.Bold
                 )
                 Surface(
@@ -166,10 +165,9 @@ fun VM(onExit: () -> Unit) {
                         .clickable { showType = true }, CircleShape, accent) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
-                            Icons.Default.Add,
-                            null,
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
+                            painter = painterResource(id = R.drawable.play_arrow_wght300_24px),
+                            contentDescription = null,
+                            tint = Color.White
                         )
                     }
                 }
@@ -205,13 +203,13 @@ fun VM(onExit: () -> Unit) {
                                     Text(
                                         c.name,
                                         fontSize = 12.sp,
-                                        fontFamily = appFont,
+                                        fontFamily = localFont,
                                         fontWeight = FontWeight.SemiBold
                                     )
                                     Text(
                                         if (c.isRunning) "Running" else "Stopped",
                                         fontSize = 10.sp,
-                                        fontFamily = appFont,
+                                        fontFamily = localFont,
                                         color = if (c.isRunning) Color(0xFF2E7D32) else Color.Gray.copy(
                                             0.6f
                                         )
@@ -245,10 +243,9 @@ fun VM(onExit: () -> Unit) {
                                         )
                                 ) {
                                     Icon(
-                                        Icons.Default.PlayArrow,
-                                        null,
-                                        tint = if (c.isRunning) Color.LightGray else accent,
-                                        modifier = Modifier.size(18.dp)
+                                        painter = painterResource(id = R.drawable.play_arrow_wght300_24px),
+                                        contentDescription = null,
+                                        tint = Color.White
                                     )
                                 }
                             }
@@ -274,12 +271,12 @@ fun TypeItem(label: String, desc: String?, enabled: Boolean, accent: Color, onCl
             Text(
                 label,
                 fontSize = 14.sp,
-                fontFamily = localAppFont.current,
+                fontFamily = localFont.current,
                 fontWeight = FontWeight.Bold,
                 color = if (enabled) Color.Black else Color.Gray
             )
             if (desc != null) Text(
-                desc, fontSize = 10.sp, fontFamily = localAppFont.current, color = Color.LightGray
+                desc, fontSize = 10.sp, fontFamily = localFont.current, color = Color.LightGray
             )
         }
     }

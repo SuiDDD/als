@@ -5,7 +5,6 @@ plugins {
 android {
     namespace = "sui.k.als"
     compileSdkPreview = "CANARY"
-
     defaultConfig {
         applicationId = "sui.k.als"
         minSdk = 33
@@ -13,17 +12,38 @@ android {
         versionCode = 10
         versionName = "26.4.13"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
         ndk {
             abiFilters.add("arm64-v8a")
         }
     }
     buildTypes {
         release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
-            )
+            isMinifyEnabled = true
+            isShrinkResources = true
+            setProguardFiles(listOf(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            ))
+            ndk {
+                debugSymbolLevel = "none"
+            }
+            packaging {
+                jniLibs {
+                    useLegacyPackaging = false
+                }
+                resources {
+                    excludes += "/META-INF/{AL2.0,LGPL2.1}"
+                    excludes += "/META-INF/*.kotlin_module"
+                    excludes += "**/DebugProbesKt.bin"
+                    excludes += "/META-INF/androidx.*"
+                    excludes += "/META-INF/com.android.*"
+                    excludes += "/META-INF/kotlin-*"
+                    excludes += "/kotlin/**"
+                    excludes += "/*.properties"
+                    excludes += "/META-INF/*.version"
+                    excludes += "/META-INF/*.txt"
+                }
+            }
         }
     }
     compileOptions {
@@ -32,7 +52,22 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = false
+        resValues = false
+        aidl = false
     }
+    bundle {
+        @Suppress("UnstableApiUsage")
+        language { enableSplit = true }
+        @Suppress("UnstableApiUsage")
+        density { enableSplit = true }
+        @Suppress("UnstableApiUsage")
+        abi { enableSplit = true }
+    }
+    @Suppress("UnstableApiUsage")
+    experimentalProperties["android.experimental.art-profile-r8-rewriting"] = true
+    @Suppress("UnstableApiUsage")
+    experimentalProperties["android.experimental.r8.fullMode"] = true
 }
 dependencies {
     implementation(libs.androidx.core.ktx)
@@ -46,7 +81,6 @@ dependencies {
     implementation(libs.termux.app)
     implementation(libs.guava.listenablefuture)
     implementation(libs.androidx.compose.ui.unit)
-    implementation(libs.androidx.compose.material.icons.extended)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

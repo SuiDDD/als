@@ -11,6 +11,7 @@ composeBom = "2026.03.01"
 guavaListenableFuture = "9999.0-empty-to-avoid-conflict-with-guava"
 termuxApp = "v0.119.0-beta.3"
 uiUnit = "1.10.6"
+ui = "1.10.6"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
@@ -31,6 +32,7 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 guava-listenablefuture = { group = "com.google.guava", name = "listenablefuture", version.ref = "guavaListenableFuture" }
 termux-app = { module = "com.github.termux:termux-app", version.ref = "termuxApp" }
 androidx-compose-ui-unit = { group = "androidx.compose.ui", name = "ui-unit", version.ref = "uiUnit" }
+androidx-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "ui" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

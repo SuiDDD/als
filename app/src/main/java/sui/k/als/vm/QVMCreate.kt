@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import org.json.JSONObject
 import sui.k.als.R
-import sui.k.als.localAppFont
+import sui.k.als.localFont
 import java.io.DataOutputStream
 
 @Composable
@@ -130,7 +130,7 @@ fun VMCreate(configuration: VMConfig? = null, onBack: () -> Unit) {
             } catch (_: Exception) {
             }
         }) { index ->
-        val appFont = localAppFont.current
+        val localFont = localFont.current
         when (index) {
             0 -> ListCellGroup(
                 listOf(
@@ -180,7 +180,7 @@ fun VMCreate(configuration: VMConfig? = null, onBack: () -> Unit) {
                             stringResource(R.string.download_ubuntu_iso),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium,
-                            fontFamily = appFont,
+                            fontFamily = localFont,
                             color = Color(0xFFE95420)
                         )
                     }
@@ -257,7 +257,7 @@ fun VMCreate(configuration: VMConfig? = null, onBack: () -> Unit) {
                     fontSize = 9.sp,
                     color = Color.Gray,
                     modifier = Modifier.padding(16.dp),
-                    fontFamily = appFont
+                    fontFamily = localFont
                 )
             }
         }
