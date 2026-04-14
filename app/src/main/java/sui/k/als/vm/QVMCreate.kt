@@ -30,7 +30,7 @@ import sui.k.als.localFont
 import java.io.DataOutputStream
 
 @Composable
-fun VMCreate(configuration: VMConfig? = null, onBack: () -> Unit) {
+fun QVMCreate(configuration: VMConfig? = null, onBack: () -> Unit) {
     val context = LocalContext.current
     val stateMap = remember {
         mutableStateMapOf<String, Any>().apply {
@@ -130,7 +130,7 @@ fun VMCreate(configuration: VMConfig? = null, onBack: () -> Unit) {
             } catch (_: Exception) {
             }
         }) { index ->
-        val localFont = localFont.current
+        val currentLocalFont = localFont.current
         when (index) {
             0 -> ListCellGroup(
                 listOf(
@@ -180,7 +180,7 @@ fun VMCreate(configuration: VMConfig? = null, onBack: () -> Unit) {
                             stringResource(R.string.download_ubuntu_iso),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium,
-                            fontFamily = localFont,
+                            fontFamily = currentLocalFont,
                             color = Color(0xFFE95420)
                         )
                     }
@@ -257,7 +257,7 @@ fun VMCreate(configuration: VMConfig? = null, onBack: () -> Unit) {
                     fontSize = 9.sp,
                     color = Color.Gray,
                     modifier = Modifier.padding(16.dp),
-                    fontFamily = localFont
+                    fontFamily = currentLocalFont
                 )
             }
         }
