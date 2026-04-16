@@ -42,4 +42,12 @@
     <string name="usb_2_0_ports">USB 2.0 端口数</string>
     <string name="usb_3_0_ports">USB 3.0 端口数</string>
     <string name="vnc_port">VNC 端口</string>
+
+    <string name="disable_sandbox">禁用沙盒 (Sandbox)</string>
+    <string name="enable_hugepages">启用巨页 (Hugepages)</string>
+    <string name="protected_vm">受保护的虚拟机 (Protected VM)</string>
+    <string name="firmware_path">固件路径</string>
+    <string name="enable_balloon">启用内存气球 (Balloon)</string>
+    <string name="fb_width">帧缓冲宽度</string>
+    <string name="fb_height">帧缓冲高度</string>
 </resources>

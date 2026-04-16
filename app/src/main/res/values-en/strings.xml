@@ -42,4 +42,12 @@
     <string name="usb_2_0_ports">USB 2.0 Ports</string>
     <string name="usb_3_0_ports">USB 3.0 Ports</string>
     <string name="vnc_port">VNC Port</string>
+
+    <string name="disable_sandbox">Disable Sandbox</string>
+    <string name="enable_hugepages">Enable Hugepages</string>
+    <string name="protected_vm">Protected VM</string>
+    <string name="firmware_path">Firmware Path</string>
+    <string name="enable_balloon">Enable Balloon</string>
+    <string name="fb_width">FB Width</string>
+    <string name="fb_height">FB Height</string>
 </resources>

@@ -55,8 +55,8 @@ import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
-const val alsPath = "/data/local/tmp/als/"
-const val markFile = "${alsPath}als260406"
+const val alsPath = "/data/local/tmp/als"
+const val markFile = "$alsPath/als260406"
 
 @Composable
 fun Home(onFinished: () -> Unit) {
@@ -96,7 +96,7 @@ fun Home(onFinished: () -> Unit) {
                     conn.inputStream.use { i -> FileOutputStream(localTar).use { o -> i.copyTo(o) } }
                 }
                 val script =
-                    "mkdir -p $alsPath && cp ${localBb.absolutePath} ${alsPath}busybox && cp ${localTar.absolutePath} ${alsPath}01.tar.xz && chmod 755 ${alsPath}busybox && cd $alsPath && ./busybox tar -xJf 01.tar.xz && touch $markFile && rm ${alsPath}01.tar.xz"
+                    "mkdir -p $alsPath && cp ${localBb.absolutePath} $alsPath/busybox && cp ${localTar.absolutePath} $alsPath/01.tar.xz && chmod 755 $alsPath/busybox && cd $alsPath && ./busybox tar -xJf 01.tar.xz && touch $markFile && rm $alsPath/01.tar.xz"
                 ProcessBuilder(su, "-c", script).start().waitFor()
             }
         }

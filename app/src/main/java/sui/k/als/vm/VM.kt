@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import sui.k.als.boot.alsPath
 import sui.k.als.boot.su
 import sui.k.als.tty.TTYInstance
 import sui.k.als.tty.TTYSessionStub
@@ -27,7 +28,8 @@ data class VMConfig(
     val name: String,
     val command: String,
     var isRunning: Boolean = false,
-    val raw: JSONObject? = null
+    val raw: JSONObject? = null,
+    val type: String
 )
 
 @Composable
@@ -39,35 +41,59 @@ fun VM(onExit: () -> Unit) {
     var creatingType by remember { mutableStateOf<String?>(null) }
     var showType by remember { mutableStateOf(false) }
     var terminal by remember { mutableStateOf<TTYInstance?>(null) }
-    fun refresh() {
-        val dir = File("/data/local/tmp/als/dev/")
-        if (!dir.exists()) {
-            configs = emptyList()
-            return
+
+    fun parseCfg(file: File): JSONObject {
+        val lines = file.readLines()
+        val json = JSONObject()
+        lines.forEach { line ->
+            val parts = line.split(": ", limit = 2)
+            if (parts.size == 2) {
+                val key = parts[0].trim()
+                when (val value = parts[1].trim()) {
+                    "true" -> json.put(key, true)
+                    "false" -> json.put(key, false)
+                    else -> json.put(key, value)
+                }
+            }
         }
-        val files = dir.listFiles { _, n -> !n.endsWith(".sock") } ?: emptyArray()
-        configs = files.mapNotNull { f ->
-            runCatching {
-                val j = JSONObject(f.readText().trim())
-                val n = j.optString("name").takeIf { it.isNotEmpty() } ?: return@mapNotNull null
-                val r = Runtime.getRuntime().exec(
-                    arrayOf(
-                        "sh",
-                        "-c",
-                        "su -c '[ -S /data/local/tmp/als/dev/$n.sock ] && echo 1 || echo 0'"
-                    )
-                )
-                val running = r.inputStream.bufferedReader().use { it.readText().trim() == "1" }
-                VMConfig(n, j.optString("command", ""), running, j)
-            }.getOrNull()
-        }
+        return json
     }
+
+    fun refresh() {
+        val list = mutableListOf<VMConfig>()
+        val baseDir = File("$alsPath/app")
+
+        listOf("qvm" to "qemu", "cvm" to "crosvm").forEach { (folder, type) ->
+            val dir = File(baseDir, folder)
+            if (dir.exists()) {
+                dir.listFiles()?.filter { it.isDirectory }?.forEach { subDir ->
+                    val cfgFile = File(subDir, "${subDir.name}.cfg")
+                    if (cfgFile.exists()) {
+                        runCatching {
+                            val j = parseCfg(cfgFile)
+                            val n = j.optString("name").ifEmpty { subDir.name }
+                            val sockPath = if (type == "qemu") "$alsPath/dev/$n.sock" else ""
+                            val running = if (sockPath.isNotEmpty()) {
+                                val r = Runtime.getRuntime().exec(arrayOf("sh", "-c", "su -c '[ -S \"$sockPath\" ] && echo 1 || echo 0'"))
+                                r.inputStream.bufferedReader().use { it.readText().trim() == "1" }
+                            } else false
+
+                            list.add(VMConfig(n, j.optString("command", ""), running, j, type))
+                        }
+                    }
+                }
+            }
+        }
+        configs = list
+    }
+
     LaunchedEffect(Unit) {
         while (true) {
             refresh()
             delay(3000)
         }
     }
+
     fun startVM(config: VMConfig) {
         terminal = createTTYInstance(context, object : TTYSessionStub() {
             override fun onSessionFinished(session: com.termux.terminal.TerminalSession) {
@@ -84,11 +110,12 @@ fun VM(onExit: () -> Unit) {
                 delay(90)
                 cmd(su)
                 delay(90)
-                cmd("DIR=/data/local/tmp/als/")
+                cmd("DIR=$alsPath")
                 cmd(config.command)
             }
         }
     }
+
     BackHandler {
         if (terminal != null) {
             terminal = null
@@ -101,6 +128,7 @@ fun VM(onExit: () -> Unit) {
             onExit()
         }
     }
+
     VMContent(
         configs = configs,
         terminal = terminal,
@@ -117,5 +145,6 @@ fun VM(onExit: () -> Unit) {
             creatingType = null
             editing = null
             refresh()
-        })
+        }
+    )
 }
