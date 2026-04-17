@@ -1,0 +1,15 @@
+[package]
+name = "qdb"
+version = "26.4.18"
+edition = "2024"
+[dependencies]
+image = { version = "0.25.10", default-features = false, features = ["png"] }
+[profile.release]
+codegen-units = 1
+debug = false
+incremental = false
+lto = "fat"
+opt-level = "z"
+overflow-checks = false
+panic = "abort"
+strip = true

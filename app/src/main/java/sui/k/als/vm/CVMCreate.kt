@@ -99,7 +99,7 @@ fun CVMCreate(configuration: VMConfig? = null, onBack: () -> Unit) {
                 InputCell(stringResource(R.string.vnc_port), stateMap["vnc_port"].toString()) { stateMap["vnc_port"] = it }
             }
             5 -> SelectionContainer {
-                Text(commandBuilder, fontSize = 9.sp, color = Color.Gray, modifier = Modifier.padding(16.dp), fontFamily = currentLocalFont)
+                Text(commandBuilder, fontSize = 9.sp, color = Color.Gray,fontFamily = currentLocalFont)
             }
         }
     }

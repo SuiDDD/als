@@ -148,7 +148,7 @@ fun QVMCreate(configuration: VMConfig? = null, onBack: () -> Unit) {
             7 -> ToggleCell(stringResource(R.string.audio_output), stateMap["audio"] as Boolean) { stateMap["audio"] = it }
             8 -> ListCellGroup(listOf(R.string.usb_2_0_ports to "p2", R.string.usb_3_0_ports to "p3"), stateMap)
             9 -> SelectionContainer {
-                Text(commandBuilder, fontSize = 9.sp, color = Color.Gray, modifier = Modifier.padding(16.dp), fontFamily = currentLocalFont)
+                Text(commandBuilder, fontSize = 9.sp, color = Color.Gray,fontFamily = currentLocalFont)
             }
         }
     }

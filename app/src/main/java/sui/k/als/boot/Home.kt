@@ -1,5 +1,4 @@
 package sui.k.als.boot
-
 import android.app.Activity
 import android.content.Context
 import android.view.MotionEvent
@@ -23,7 +22,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -37,10 +35,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import sui.k.als.R
 import sui.k.als.localFont
 import sui.k.als.tty.TTYInstance
@@ -50,14 +46,7 @@ import sui.k.als.tty.TTYViewStub
 import sui.k.als.tty.cmd
 import sui.k.als.tty.createTTYInstance
 import sui.k.als.vm.VM
-import java.io.File
-import java.io.FileOutputStream
-import java.net.HttpURLConnection
-import java.net.URL
-
 const val alsPath = "/data/local/tmp/als"
-const val markFile = "$alsPath/als260406"
-
 @Composable
 fun Home(onFinished: () -> Unit) {
     val ctx = LocalContext.current
@@ -76,30 +65,6 @@ fun Home(onFinished: () -> Unit) {
     BackHandler(showTTY || showVM) {
         if (showTTY) showTTY = false
         else if (showVM) showVM = false
-    }
-    LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
-            val check = ProcessBuilder(
-                su, "-c", "[ -f $markFile ] && echo 1 || echo 0"
-            ).start().inputStream.bufferedReader().readText().trim()
-            if (check != "1") {
-                val localBb = File(ctx.filesDir, "busybox")
-                val localTar = File(ctx.filesDir, "01.tar.xz")
-                if (!localBb.exists()) {
-                    ctx.assets.open("busybox")
-                        .use { i -> FileOutputStream(localBb).use { o -> i.copyTo(o) } }
-                }
-                if (!localTar.exists()) {
-                    val conn =
-                        URL("https://github.com/SuiDDD/als/releases/download/26.4.13R2/01.tar.xz").openConnection() as HttpURLConnection
-                    conn.instanceFollowRedirects = true
-                    conn.inputStream.use { i -> FileOutputStream(localTar).use { o -> i.copyTo(o) } }
-                }
-                val script =
-                    "mkdir -p $alsPath && cp ${localBb.absolutePath} $alsPath/busybox && cp ${localTar.absolutePath} $alsPath/01.tar.xz && chmod 755 $alsPath/busybox && cd $alsPath && ./busybox tar -xJf 01.tar.xz && touch $markFile && rm $alsPath/01.tar.xz"
-                ProcessBuilder(su, "-c", script).start().waitFor()
-            }
-        }
     }
     Box(
         Modifier
@@ -139,15 +104,12 @@ fun Home(onFinished: () -> Unit) {
                                 }
                             })
                             sessions.add(
-                                "$menuSession ${
-                                sessions.count {
-                                    it.first.contains(
-                                        menuSession
-                                    )
-                                } + 1
-                            }" to instance)
+                                "$menuSession ${sessions.count { it.first.contains(menuSession) } + 1}" to instance
+                            )
                             activeSession = instance; showTTY = true; showVM = false
-                            scope.launch { delay(100); cmd(su); delay(100); cmd("cd $alsPath && clear && ./busybox") }
+                            scope.launch {
+                                delay(100); cmd(su); delay(100); cmd("cd $alsPath && clear")
+                            }
                         })
                     Spacer(Modifier.width(9.dp))
                     LazyRow(
@@ -179,7 +141,6 @@ fun Home(onFinished: () -> Unit) {
         if (showTTY) activeSession?.let { TTYScreen(it) }
     }
 }
-
 @Composable
 fun MenuLine(
     text: String,
