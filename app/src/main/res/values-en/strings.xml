@@ -11,7 +11,7 @@
     <string name="cdrom">CD-ROM</string>
     <string name="cdrom_path">CD-ROM Path</string>
     <string name="command_preview">Command Preview</string>
-    <string name="configuration_name">Configuration Name</string>
+    <string name="cfg_name">Configuration Name</string>
     <string name="cpu_cores">CPU Cores</string>
     <string name="cpu_sockets">CPU Sockets</string>
     <string name="cpu_threads">CPU Threads</string>
@@ -35,12 +35,12 @@
     <string name="processor">Processor</string>
     <string name="queue_count">Queue Count</string>
     <string name="session">Session</string>
-    <string name="smp_threads">SMP Threads</string>
+    <string name="smp">SMP Threads</string>
     <string name="swiotlb_buffer_size">SWIOTLB Buffer Size</string>
     <string name="system">System</string>
     <string name="usb">USB</string>
-    <string name="usb_2_0_ports">USB 2.0 Ports</string>
-    <string name="usb_3_0_ports">USB 3.0 Ports</string>
+    <string name="usb2_port">USB 2.0 Ports</string>
+    <string name="usb3_port">USB 3.0 Ports</string>
     <string name="vnc_port">VNC Port</string>
 
     <string name="disable_sandbox">Disable Sandbox</string>
@@ -50,4 +50,11 @@
     <string name="enable_balloon">Enable Balloon</string>
     <string name="fb_width">FB Width</string>
     <string name="fb_height">FB Height</string>
+    <string name="highest">Highest</string>
+    <string name="lowest">Lowest</string>
+    <string name="Default">Default</string>
+    <string name="prealloc">Prealloc</string>
+    <string name="alloc_size">Alloc Size</string>
+    <string name="force_alloc">Force Alloc</string>
+    <string name="mem_lock">Mem Lock</string>
 </resources>

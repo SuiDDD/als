@@ -1,5 +1,8 @@
 package sui.k.als.vm
+
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.compose.BackHandler
@@ -15,9 +18,10 @@ import sui.k.als.tty.TTYSessionStub
 import sui.k.als.tty.TTYViewStub
 import sui.k.als.tty.cmd
 import sui.k.als.tty.createTTYInstance
-import sui.k.als.vnc.VNCScreen
 import java.io.File
+
 data class VMConfig(val name: String, val command: String, var isRunning: Boolean = false, val raw: JSONObject? = null, val type: String)
+
 @Composable
 fun VM(onExit: () -> Unit) {
     val context = LocalContext.current
@@ -29,7 +33,17 @@ fun VM(onExit: () -> Unit) {
     var terminalInstance by remember { mutableStateOf<TTYInstance?>(null) }
     var showTerminal by remember { mutableStateOf(false) }
     var currentTerminalVm by remember { mutableStateOf<String?>(null) }
-    var activeDisplay by remember { mutableStateOf(false) }
+
+    fun launchVNC() {
+        runCatching {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("vnc://localhost:5900")).apply {
+                setPackage("com.gaurav.avnc")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+        }
+    }
+
     fun parseCfg(file: File): JSONObject {
         val json = JSONObject()
         runCatching {
@@ -47,6 +61,7 @@ fun VM(onExit: () -> Unit) {
         }
         return json
     }
+
     fun refresh() {
         val list = mutableListOf<VMConfig>()
         val baseDir = File("$alsPath/app")
@@ -68,12 +83,14 @@ fun VM(onExit: () -> Unit) {
         }
         configs = list
     }
+
     LaunchedEffect(Unit) {
         while (true) {
             refresh()
             delay(3000)
         }
     }
+
     fun openTerminal(config: VMConfig) {
         if (currentTerminalVm == config.name && terminalInstance != null) {
             showTerminal = true
@@ -101,48 +118,45 @@ fun VM(onExit: () -> Unit) {
             }
         }
     }
+
     BackHandler {
-        if (activeDisplay) activeDisplay = false
-        else if (showTerminal) showTerminal = false
+        if (showTerminal) showTerminal = false
         else if (showType) showType = false
         else if (creatingType != null || editing != null) { creatingType = null; editing = null }
         else onExit()
     }
-    if (activeDisplay) {
-        VNCScreen(onExit = { activeDisplay = false })
-    } else {
-        VMContent(
-            configs = configs,
-            terminal = if (showTerminal) terminalInstance else null,
-            creatingType = creatingType,
-            editing = editing,
-            showType = showType,
-            onStartVM = {
-                if (!it.isRunning) {
-                    openTerminal(it)
-                    if (it.type == "qemu") {
-                        scope.launch {
-                            repeat(50) {
-                                val running = Runtime.getRuntime().exec(arrayOf("sh", "-c", "pidof qemu-system-aarch64")).inputStream.bufferedReader().use { r -> r.readText().trim().isNotEmpty() }
-                                if (running) {
-                                    activeDisplay = true
-                                    showTerminal = false
-                                    return@launch
-                                }
-                                delay(200)
+
+    VMContent(
+        configs = configs,
+        terminal = if (showTerminal) terminalInstance else null,
+        creatingType = creatingType,
+        editing = editing,
+        showType = showType,
+        onStartVM = {
+            if (!it.isRunning) {
+                openTerminal(it)
+                if (it.type == "qemu") {
+                    scope.launch {
+                        repeat(50) {
+                            val running = Runtime.getRuntime().exec(arrayOf("sh", "-c", "pidof qemu-system-aarch64")).inputStream.bufferedReader().use { r -> r.readText().trim().isNotEmpty() }
+                            if (running) {
+                                showTerminal = false
+                                launchVNC()
+                                return@launch
                             }
+                            delay(200)
                         }
                     }
-                } else openTerminal(it)
-            },
-            onEditVM = { editing = it },
-            onCreateClick = { showType = true },
-            onSelectQvm = { showType = false; creatingType = "qemu" },
-            onSelectCvm = { showType = false; creatingType = "crosvm" },
-            onDismissType = { showType = false },
-            onEditorExit = { creatingType = null; editing = null; refresh() },
-            onTerminalShow = { openTerminal(it) },
-            onDisplayShow = { activeDisplay = true }
-        )
-    }
+                }
+            } else openTerminal(it)
+        },
+        onEditVM = { editing = it },
+        onCreateClick = { showType = true },
+        onSelectQvm = { showType = false; creatingType = "qemu" },
+        onSelectCvm = { showType = false; creatingType = "crosvm" },
+        onDismissType = { showType = false },
+        onEditorExit = { creatingType = null; editing = null; refresh() },
+        onTerminalShow = { openTerminal(it) },
+        onDisplayShow = { launchVNC() }
+    )
 }

@@ -1,6 +1,6 @@
 <resources>
     <string name="add_virtual_machine">添加虚拟机</string>
-    <string name="aio_mode">异步 I/O 模式</string>
+    <string name="aio_mode">异步模式</string>
     <string name="app_name">ALS</string>
     <string name="archive">存档</string>
     <string name="audio">音频</string>
@@ -11,7 +11,7 @@
     <string name="cdrom">光盘</string>
     <string name="cdrom_path">光盘路径</string>
     <string name="command_preview">命令预览</string>
-    <string name="configuration_name">配置名称</string>
+    <string name="cfg_name">配置名称</string>
     <string name="cpu_cores">CPU 核心</string>
     <string name="cpu_sockets">CPU 插槽</string>
     <string name="cpu_threads">CPU 线程</string>
@@ -23,31 +23,38 @@
     <string name="download_ubuntu_iso">下载 Ubuntu 安装光盘</string>
     <string name="enable_cdrom">启用光盘</string>
     <string name="exit">退出</string>
-    <string name="io_thread_optimization">I/O 线程优化</string>
+    <string name="io_thread_optimization">线程优化</string>
     <string name="memory">内存</string>
     <string name="memory_size">内存大小</string>
     <string name="network">网络</string>
     <string name="network_device">网络设备</string>
     <string name="network_protocol">网络协议</string>
-    <string name="nice_value">Nice 值</string>
+    <string name="nice_value">优先级</string>
     <string name="port_forwarding">端口转发</string>
     <string name="preview">预览</string>
     <string name="processor">CPU</string>
     <string name="queue_count">队列数量</string>
     <string name="session">会话</string>
-    <string name="smp_threads">SMP 线程</string>
+    <string name="smp">总处理器</string>
     <string name="swiotlb_buffer_size">SWIOTLB 缓冲区大小</string>
     <string name="system">系统</string>
     <string name="usb">USB</string>
-    <string name="usb_2_0_ports">USB 2.0 端口数</string>
-    <string name="usb_3_0_ports">USB 3.0 端口数</string>
+    <string name="usb2_port">USB 2.0 端口数</string>
+    <string name="usb3_port">USB 3.0 端口数</string>
     <string name="vnc_port">VNC 端口</string>
 
-    <string name="disable_sandbox">禁用沙盒 (Sandbox)</string>
-    <string name="enable_hugepages">启用巨页 (Hugepages)</string>
-    <string name="protected_vm">受保护的虚拟机 (Protected VM)</string>
+    <string name="disable_sandbox">禁用沙盒</string>
+    <string name="enable_hugepages">启用巨页</string>
+    <string name="protected_vm">受保护的虚拟机</string>
     <string name="firmware_path">固件路径</string>
-    <string name="enable_balloon">启用内存气球 (Balloon)</string>
+    <string name="enable_balloon">启用内存气球</string>
     <string name="fb_width">帧缓冲宽度</string>
     <string name="fb_height">帧缓冲高度</string>
+    <string name="highest">最高</string>
+    <string name="lowest">最低</string>
+    <string name="Default">默认</string>
+    <string name="prealloc">预分配</string>
+    <string name="alloc_size">分配大小</string>
+    <string name="force_alloc">强制分配</string>
+    <string name="mem_lock">内存锁定</string>
 </resources>

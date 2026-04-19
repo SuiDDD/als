@@ -16,6 +16,8 @@ import sui.k.als.R
 import sui.k.als.localFont
 import sui.k.als.tty.TTYInstance
 import sui.k.als.tty.TTYScreen
+import sui.k.als.vm.cvm.CVMCreate
+
 @Composable
 fun VMContent(
     configs: List<VMConfig>,
@@ -38,7 +40,13 @@ fun VMContent(
         Box(Modifier.fillMaxSize()) {
             when {
                 terminal != null -> TTYScreen(terminal)
-                editing != null -> if (editing.raw?.optString("command", "")?.contains("crosvm") == true) CVMCreate(editing, onEditorExit) else QVMCreate(editing, onEditorExit)
+                editing != null -> if (editing.raw?.optString("command", "")?.contains("crosvm") == true) CVMCreate(
+                    editing,
+                    onEditorExit
+                ) else QVMCreate(
+                    editing,
+                    onEditorExit
+                )
                 creatingType == "qemu" -> QVMCreate(null, onEditorExit)
                 creatingType == "crosvm" -> CVMCreate(null, onEditorExit)
                 else -> Column(Modifier.fillMaxSize()) {
