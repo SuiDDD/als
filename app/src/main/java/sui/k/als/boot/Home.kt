@@ -114,7 +114,7 @@ fun Home(onFinished: () -> Unit) {
                                 } + 1
                             }" to instance)
                             activeSession = instance; showTTY = true; showVM = false
-                            scope.launch { delay(100); cmd(su); delay(100); cmd("cd $alsPath && clear") }
+                            scope.launch { delay(100); cmd(su); delay(90); cmd("cd $alsPath && clear && busybox") }
                         })
                     Spacer(Modifier.width(9.dp))
                     LazyRow(
