@@ -206,7 +206,7 @@ private fun RowScope.KeyBase(
                             processKey(label)
                             delay(300L)
                             while (true) {
-                                processKey(label); delay(if (System.currentTimeMillis() - start < 3000) 35L else 12L)
+                                processKey(label); delay(if (System.currentTimeMillis() - start < 3000) 18L else 9L)
                             }
                         }
                     }
@@ -221,7 +221,7 @@ private fun RowScope.KeyBase(
         .background(Color.Transparent), contentAlignment = Alignment.Center) {
         Text(
             disp,
-            color = if (isPressed || isActive) Color(0xFFE95420) else Color.White,
+            color = if (isPressed || isActive) Color.Gray else Color.White,
             fontSize = 12.sp,
             softWrap = false
         )

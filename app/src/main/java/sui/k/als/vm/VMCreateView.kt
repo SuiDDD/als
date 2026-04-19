@@ -56,10 +56,9 @@ fun ExpressiveCanvas(
     onAction: () -> Unit,
     content: @Composable (Int) -> Unit
 ) {
-    val localFont = localFont.current
+    val font = localFont.current
     var activeIndex by remember { mutableIntStateOf(0) }
-    val ubuntuOrange = Color(0xFFE95420)
-    Surface(color = Color.White) {
+    Surface(color = Color.Black) {
         Column(Modifier.fillMaxSize()) {
             Spacer(Modifier.fillMaxHeight(0.018f))
             Row(
@@ -69,20 +68,20 @@ fun ExpressiveCanvas(
                 Arrangement.SpaceBetween,
                 Alignment.CenterVertically
             ) {
-                Text(title, fontSize = 9.sp, fontFamily = localFont, color = Color.Black)
+                Text(text = title, fontSize = 9.sp, fontFamily = font, color = Color.White)
                 val interaction = remember { MutableInteractionSource() }
                 val isPressed by interaction.collectIsPressedAsState()
                 Box(
                     Modifier
                         .size(18.dp)
                         .clickable(interaction, null, onClick = onAction),
-                    contentAlignment = Alignment.Center
+                    Alignment.Center
                 ) {
                     Icon(
                         painterResource(R.drawable.save_wght300_24px),
                         null,
-                        tint = if (isPressed) ubuntuOrange else Color.Black,
-                        modifier = Modifier.size(12.dp)
+                        Modifier.size(12.dp),
+                        if (isPressed) Color.White else Color.Gray
                     )
                 }
             }
@@ -94,7 +93,6 @@ fun ExpressiveCanvas(
                         .verticalScroll(rememberScrollState())
                 ) {
                     navigationItems.forEachIndexed { index, name ->
-                        val isSelected = activeIndex == index
                         val interaction = remember { MutableInteractionSource() }
                         val isPressed by interaction.collectIsPressedAsState()
                         Box(
@@ -102,23 +100,23 @@ fun ExpressiveCanvas(
                                 .fillMaxWidth()
                                 .height(18.dp)
                                 .clickable(interaction, null) { activeIndex = index },
-                            contentAlignment = Alignment.CenterStart
+                            Alignment.CenterStart
                         ) {
                             Text(
-                                name,
+                                text = name,
                                 fontSize = 9.sp,
-                                color = if (isSelected || isPressed) ubuntuOrange else Color.Gray,
-                                fontFamily = localFont
+                                fontFamily = font,
+                                color = if (activeIndex == index || isPressed) Color.White else Color.Gray
                             )
                         }
                     }
                 }
                 Surface(
-                    Modifier
+                    modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
                         .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen },
-                    color = Color.White
+                    color = Color.Black
                 ) {
                     AnimatedContent(activeIndex, transitionSpec = {
                         val spec = tween<Float>(90, easing = LinearEasing)
@@ -132,17 +130,16 @@ fun ExpressiveCanvas(
                             Box(
                                 Modifier
                                     .fillMaxWidth()
-                                    .height(18.dp),
-                                contentAlignment = Alignment.CenterStart
+                                    .height(18.dp), Alignment.CenterStart
                             ) {
                                 Text(
-                                    navigationItems[target],
+                                    text = navigationItems[target],
                                     fontSize = 9.sp,
-                                    color = ubuntuOrange,
-                                    fontFamily = localFont
+                                    color = Color.White,
+                                    fontFamily = font
                                 )
                             }
-                            Column { content(target) }
+                            content(target)
                             Spacer(Modifier.height(18.dp))
                         }
                     }
@@ -160,23 +157,19 @@ fun InputCell(label: String, value: String, onValueChange: (String) -> Unit) {
             .height(18.dp), verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            label,
+            text = label,
+            modifier = Modifier.weight(0.3f),
+            color = Color.White,
             fontSize = 9.sp,
-            color = Color.Black,
-            fontFamily = localFont.current,
-            modifier = Modifier.weight(0.3f)
+            fontFamily = localFont.current
         )
         BasicTextField(
-            value,
-            onValueChange,
-            Modifier.weight(0.7f),
-            cursorBrush = SolidColor(Color(0xFFE95420)),
-            textStyle = TextStyle(
+            value, onValueChange, Modifier.weight(0.7f), textStyle = TextStyle(
                 fontSize = 9.sp,
+                color = Color.White,
                 fontFamily = localFont.current,
-                textAlign = TextAlign.End,
-                color = Color(0xFFE95420)
-            )
+                textAlign = TextAlign.End
+            ), cursorBrush = SolidColor(Color.White)
         )
     }
 }
@@ -193,17 +186,17 @@ fun ToggleCell(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Un
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            label,
-            Modifier.weight(1f),
+            text = label,
+            modifier = Modifier.weight(1f),
+            color = if (isPressed) Color.Gray else Color.White,
             fontSize = 9.sp,
-            color = if (isPressed) Color(0xFFE95420) else Color.Black,
             fontFamily = localFont.current
         )
         Box(
-            modifier = Modifier
+            Modifier
                 .size(9.dp)
-                .background(if (checked) Color(0xFFE95420) else Color.Transparent, CircleShape)
-                .border(0.3.dp, if (checked) Color(0xFFE95420) else Color.Gray, CircleShape)
+                .background(if (checked) Color.White else Color.Transparent, CircleShape)
+                .border(0.3.dp, if (checked) Color.White else Color.Gray, CircleShape)
         )
     }
 }

@@ -1,4 +1,5 @@
 package sui.k.als.boot
+
 import android.app.Activity
 import android.content.Context
 import android.view.MotionEvent
@@ -46,7 +47,9 @@ import sui.k.als.tty.TTYViewStub
 import sui.k.als.tty.cmd
 import sui.k.als.tty.createTTYInstance
 import sui.k.als.vm.VM
+
 const val alsPath = "/data/local/tmp/als"
+
 @Composable
 fun Home(onFinished: () -> Unit) {
     val ctx = LocalContext.current
@@ -56,7 +59,6 @@ fun Home(onFinished: () -> Unit) {
     var activeSession by remember { mutableStateOf<TTYInstance?>(null) }
     var showTTY by remember { mutableStateOf(false) }
     var showVM by remember { mutableStateOf(false) }
-    val ubuntuOrange = Color(0xFFE95420)
     val menuSys = stringResource(R.string.system)
     val menuSession = stringResource(R.string.session)
     val menuExit = stringResource(R.string.exit)
@@ -83,8 +85,8 @@ fun Home(onFinished: () -> Unit) {
                     val interaction = remember { MutableInteractionSource() }
                     val isPressed by interaction.collectIsPressedAsState()
                     Text(
-                        menuSession,
-                        color = if (isPressed) ubuntuOrange else Color.White,
+                        text = menuSession,
+                        color = if (isPressed) Color.Gray else Color.White,
                         fontSize = 9.sp,
                         fontFamily = font,
                         modifier = Modifier.clickable(interaction, null) {
@@ -104,16 +106,19 @@ fun Home(onFinished: () -> Unit) {
                                 }
                             })
                             sessions.add(
-                                "$menuSession ${sessions.count { it.first.contains(menuSession) } + 1}" to instance
-                            )
+                                "$menuSession ${
+                                sessions.count {
+                                    it.first.contains(
+                                        menuSession
+                                    )
+                                } + 1
+                            }" to instance)
                             activeSession = instance; showTTY = true; showVM = false
-                            scope.launch {
-                                delay(100); cmd(su); delay(100); cmd("cd $alsPath && clear")
-                            }
+                            scope.launch { delay(100); cmd(su); delay(100); cmd("cd $alsPath && clear") }
                         })
                     Spacer(Modifier.width(9.dp))
                     LazyRow(
-                        modifier = Modifier.weight(1f),
+                        Modifier.weight(1f),
                         horizontalArrangement = Arrangement.spacedBy(9.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -121,10 +126,10 @@ fun Home(onFinished: () -> Unit) {
                             val sInt = remember { MutableInteractionSource() }
                             val sPre by sInt.collectIsPressedAsState()
                             Text(
-                                item.first,
+                                text = item.first,
                                 fontSize = 9.sp,
                                 fontFamily = font,
-                                color = if (sPre || activeSession == item.second) ubuntuOrange else Color.Gray,
+                                color = if (sPre || activeSession == item.second) Color.Gray else Color.White,
                                 modifier = Modifier.clickable(sInt, null) {
                                     activeSession = item.second; showTTY = true; showVM = false
                                 })
@@ -141,6 +146,7 @@ fun Home(onFinished: () -> Unit) {
         if (showTTY) activeSession?.let { TTYScreen(it) }
     }
 }
+
 @Composable
 fun MenuLine(
     text: String,
@@ -158,8 +164,8 @@ fun MenuLine(
         Alignment.CenterStart
     ) {
         Text(
-            text,
-            color = if (isPressed) Color(0xFFE95420) else baseColor,
+            text = text,
+            color = if (isPressed) Color.Gray else baseColor,
             fontSize = 9.sp,
             fontFamily = font
         )

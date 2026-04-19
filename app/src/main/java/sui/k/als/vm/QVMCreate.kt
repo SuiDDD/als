@@ -30,6 +30,7 @@ import java.io.DataOutputStream
 @Composable
 fun QVMCreate(configuration: VMConfig? = null, onBack: () -> Unit) {
     val context = LocalContext.current
+    val qvmPath = "/data/local/tmp/als/app/qvm"
     val stateMap = remember {
         mutableStateMapOf<String, Any>().apply {
             val raw = configuration?.raw
@@ -70,12 +71,10 @@ fun QVMCreate(configuration: VMConfig? = null, onBack: () -> Unit) {
     val commandBuilder by remember {
         derivedStateOf {
             buildString {
-                val name = stateMap["name"]
-                val qmp = "-qmp unix:\"$alsPath/dev/$name.sock\",server,nowait "
                 val vncPortStr = stateMap["vnc_port"].toString()
                 val vncDisplay = try { (vncPortStr.toInt() - 5900).coerceAtLeast(0) } catch (_: Exception) { 0 }
                 if (stateMap["vnc_enable"] as Boolean) append("(sleep 12 && am start -a android.intent.action.VIEW -d \"vnc://localhost:$vncPortStr\" com.realvnc.viewer.android) & ")
-                append($$"LD_LIBRARY_PATH=$DIR/libs nice -n $${stateMap["nice"]} taskset $(printf '%x' $(( (1 << $(nproc)) - 1 ))) $DIR/qemu-system-aarch64 -L $DIR/pc-bios -M virt,confidential-guest-support=prot0 -accel gunyah -cpu host -smp $${stateMap["smp"]},sockets=$${stateMap["sockets"]},cores=$${stateMap["cores"]},threads=$${stateMap["threads"]} -m $${stateMap["mem"]} -object arm-confidential-guest,id=prot0,swiotlb-size=$${stateMap["swiotlb"]} -bios $DIR/QEMU_EFI.fd ")
+                append("LD_LIBRARY_PATH=$qvmPath/libs nice -n ${stateMap["nice"]} taskset $(printf '%x' $(( (1 << $(nproc)) - 1 ))) $qvmPath/qemu-system-aarch64 -L $qvmPath/pc-bios -M virt,confidential-guest-support=prot0 -accel gunyah -cpu host -smp ${stateMap["smp"]},sockets=${stateMap["sockets"]},cores=${stateMap["cores"]},threads=${stateMap["threads"]} -m ${stateMap["mem"]} -object arm-confidential-guest,id=prot0,swiotlb-size=${stateMap["swiotlb"]} -bios $qvmPath/QEMU_EFI.fd ")
                 if (stateMap["io_optimization"] as Boolean) append("-object iothread,id=io0 ")
                 if (stateMap["cd_enabled"] as Boolean && (stateMap["cd_path"] as String).isNotEmpty()) append("-drive file=\"${stateMap["cd_path"]}\",if=none,id=dr1,format=raw,aio=threads,media=cdrom -device virtio-blk-pci,drive=dr1,bootindex=${stateMap["cd_boot"]} ")
                 append("-drive file=\"${(stateMap["path"] as String).ifEmpty { "$alsPath/resolute-desktop-arm64.rw" }}\",if=none,id=dr0,cache=${stateMap["cache"]},aio=${stateMap["aio"]},discard=${stateMap["discard"]} -device virtio-blk-pci,drive=dr0,num-queues=${stateMap["queues"]}${if (stateMap["io_optimization"] as Boolean) ",iothread=io0" else ""},disable-legacy=on,disable-modern=off,bootindex=${if (stateMap["cd_enabled"] as Boolean) "2" else "1"} ")
@@ -85,7 +84,7 @@ fun QVMCreate(configuration: VMConfig? = null, onBack: () -> Unit) {
                     append("-device virtio-gpu-pci,disable-legacy=on,disable-modern=off ")
                     if (stateMap["vnc_enable"] as Boolean) append("-vnc :$vncDisplay ")
                 }
-                append("-device qemu-xhci,id=usb-bus,p2=${stateMap["p2"]},p3=${stateMap["p3"]} -device usb-tablet,bus=usb-bus.0 -device usb-kbd,bus=usb-bus.0 $qmp-serial stdio")
+                append("-device qemu-xhci,id=usb-bus,p2=${stateMap["p2"]},p3=${stateMap["p3"]} -device usb-tablet,bus=usb-bus.0 -device usb-kbd,bus=usb-bus.0 -serial stdio")
             }
         }
     }
@@ -99,7 +98,7 @@ fun QVMCreate(configuration: VMConfig? = null, onBack: () -> Unit) {
                 append("command: $commandBuilder")
             }.trim()
             val escapedCfg = cfgContent.replace("'", "'\\''")
-            val targetDir = "$alsPath/app/qvm/$name"
+            val targetDir = "$qvmPath/$name"
             val targetFile = "$targetDir/$name.cfg"
             val shellScript = "mkdir -p \"$targetDir\"\necho '$escapedCfg' > \"$targetFile.tmp\"\nmv -f \"$targetFile.tmp\" \"$targetFile\"\nexit"
             DataOutputStream(Runtime.getRuntime().exec("su").outputStream).use {
