@@ -1,15 +1,23 @@
 package sui.k.als.vm.qvm
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.res.stringResource
 import sui.k.als.R
 import sui.k.als.ui.ALSList
+
 @Composable
 fun QVMAudio(qvmMap: MutableMap<String, Any>) {
     LaunchedEffect(qvmMap["audio"]) {
-        qvmMap["audio_cmd"] = if (qvmMap["audio"] == 1) "-audiodev aaudio,id=snd0 -device virtio-sound-pci,audiodev=snd0,disable-legacy=on,disable-modern=off " else ""
+        qvmMap["audio_cmd"] =
+            if (qvmMap["audio"] == 1) "-audiodev aaudio,id=snd0 -device virtio-sound-pci,audiodev=snd0,disable-legacy=on,disable-modern=off " else ""
     }
-    ALSList(stringResource(R.string.audio_output), checked = qvmMap["audio"] == 1, first = true, last = true) { 
+    ALSList(
+        stringResource(R.string.audio_output),
+        checked = qvmMap["audio"] == 1,
+        first = true,
+        last = true
+    ) {
         qvmMap["audio"] = if (qvmMap["audio"] == 1) 0 else 1
     }
 }

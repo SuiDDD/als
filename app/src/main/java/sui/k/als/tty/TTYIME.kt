@@ -45,21 +45,19 @@ object IMEState {
     var isFullKeyboardVisible by mutableStateOf(false)
     var isFloating by mutableStateOf(false)
     var keyboardOffset by mutableStateOf(IntOffset.Zero)
-    fun consumeCtrl(): Boolean = isCtrlActive
-    fun consumeShift(): Boolean = isShiftActive
-    fun consumeAlt(): Boolean = isAltActive
+    fun consumeCtrl() = isCtrlActive
+    fun consumeShift() = isShiftActive
+    fun consumeAlt() = isAltActive
     fun resetModifiers() {
-        isCtrlActive = false
-        isShiftActive = false
-        isAltActive = false
+        isCtrlActive = false; isShiftActive = false; isAltActive = false
     }
 }
 
-private val keyCodes: Map<String, String> =
+private val keyCodes =
     "Tab·\t¦Esc·\u001b¦Enter·\r¦Back·\u007f¦ · ¦↑·\u001b[A¦↓·\u001b[B¦←·\u001b[D¦→·\u001b[C¦Home·\u001b[1~¦End·\u001b[4~¦Del·\u001b[3~¦F1·\u001bOP¦F2·\u001bOQ¦F3·\u001bOR¦F4·\u001bOS¦F5·\u001b[15~¦F6·\u001b[17~¦F7·\u001b[18~¦F8·\u001b[19~¦F9·\u001b[20~¦F10·\u001b[21~¦F11·\u001b[23~¦F12·\u001b[24~".split(
         '¦'
     ).associate { it.split('·').let { p -> p[0] to p[1] } }
-private val symbolMap: Map<String, String> =
+private val symbolMap =
     "`~·1!·2@·3#·4$·5%·6^·7&·8*·9(·0)·-_·=+·[{·]}·\\|·;:·'\"·,<·.>·/?".split('·')
         .associate { it[0].toString() to it[1].toString() }
 
@@ -71,8 +69,7 @@ fun TTYIME() {
     val panelHeight =
         with(density) { (if (config.orientation == 2) windowSize.height / 2 else windowSize.height / 3).toDp() }
     BackHandler(IMEState.isFullKeyboardVisible) {
-        IMEState.isFloating = false
-        IMEState.isFullKeyboardVisible = false
+        IMEState.isFloating = false; IMEState.isFullKeyboardVisible = false
     }
     Box(modifier = if (IMEState.isFloating) Modifier
         .offset { IMEState.keyboardOffset }
@@ -84,25 +81,27 @@ fun TTYIME() {
                 .fillMaxWidth()
                 .background(Color.Black.copy(0.7f))
         ) {
-            if (!IMEState.isFullKeyboardVisible) Column(
-                Modifier
-                    .fillMaxWidth()
-                    .height(90.dp)
-            ) {
-                listOf(
-                    listOf("Esc", "F1", "F2", "F3", "·", "F4", "F5", "F6", "Del"),
-                    listOf("Shift", "F7", "F8", "F9", "↑", "F10", "F11", "F12", "Back"),
-                    listOf("Tab", "Ctrl", "Alt", "←", "↓", "→", "Home", "End", "Enter")
-                ).forEach { row ->
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                    ) {
-                        row.forEach {
-                            KeyBase(
-                                it, 1f, it in listOf("Ctrl", "Alt", "Shift"), it == "·"
-                            )
+            if (!IMEState.isFullKeyboardVisible) {
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(90.dp)
+                ) {
+                    listOf(
+                        listOf("Esc", "F1", "F2", "F3", "·", "F4", "F5", "F6", "Del"),
+                        listOf("Shift", "F7", "F8", "F9", "↑", "F10", "F11", "F12", "Back"),
+                        listOf("Tab", "Ctrl", "Alt", "←", "↓", "→", "Home", "End", "Enter")
+                    ).forEach { row ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                        ) {
+                            row.forEach {
+                                KeyBase(
+                                    it, 1f, it in listOf("Ctrl", "Alt", "Shift"), it == "·"
+                                )
+                            }
                         }
                     }
                 }
@@ -148,11 +147,10 @@ private fun RowScope.KeyBase(
         "Ctrl" -> IMEState.isCtrlActive; "Shift" -> IMEState.isShiftActive; "Alt" -> IMEState.isAltActive; "Caps" -> IMEState.isCapsActive; else -> false
     }
     val disp = when {
-        isCtrl -> ""
-        isMod || label.length > 1 || (!label[0].isLetter() && !symbolMap.containsKey(label)) -> label
-        IMEState.isShiftActive -> symbolMap[label] ?: label.uppercase()
-        IMEState.isCapsActive && label[0].isLetter() -> label.uppercase()
-        else -> label
+        isCtrl -> ""; isMod || label.length > 1 || (!label[0].isLetter() && !symbolMap.containsKey(
+            label
+        )) -> label; IMEState.isShiftActive -> symbolMap[label]
+            ?: label.uppercase(); IMEState.isCapsActive && label[0].isLetter() -> label.uppercase(); else -> label
     }
     Box(modifier = Modifier
         .weight(weight)
@@ -177,8 +175,7 @@ private fun RowScope.KeyBase(
         }
         .pointerInput(label) {
             detectTapGestures(onPress = {
-                isPressed = true
-                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                isPressed = true; view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                 if (isCtrl) {
                     try {
                         awaitRelease(); IMEState.isFullKeyboardVisible =
@@ -202,11 +199,8 @@ private fun RowScope.KeyBase(
                                 !IMEState.isCapsActive
                             }
                         } else {
-                            val start = System.currentTimeMillis()
-                            processKey(label)
-                            delay(300L)
-                            while (true) {
-                                processKey(label); delay(if (System.currentTimeMillis() - start < 3000) 18L else 9L)
+                            processKey(label); delay(300L); while (true) {
+                                processKey(label); delay(30L)
                             }
                         }
                     }

@@ -3,7 +3,15 @@ package sui.k.als.set
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,8 +32,12 @@ fun About(onBack: () -> Unit) {
     BackHandler { onBack() }
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-    
-    Box(Modifier.fillMaxSize().background(Color.Black)) {
+
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
         Column(
             modifier = Modifier
                 .padding(9.dp)

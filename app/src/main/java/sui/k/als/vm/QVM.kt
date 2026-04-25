@@ -58,6 +58,8 @@ import sui.k.als.vm.qvm.QVMCreate
 import sui.k.als.vm.qvm.QVMPreview
 import java.io.File
 
+const val qvmPath = "$alsPath/app/qvm"
+
 data class QVMConfig(
     val name: String, var isRunning: Boolean = false, val raw: JSONObject? = null
 ) {
