@@ -197,7 +197,7 @@ fun QVMRow(qvm: QVMConfig, onEdit: () -> Unit, onTerm: () -> Unit, onVnc: () -> 
             fontFamily = localFont.current
         )
         Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-            ALSButton(R.drawable.crop_landscape) { onVnc() }
+            ALSButton(R.drawable.square) { onVnc() }
             ALSButton(R.drawable.power) { onTerm() }
         }
     }

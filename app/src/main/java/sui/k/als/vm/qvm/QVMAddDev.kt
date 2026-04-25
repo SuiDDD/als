@@ -27,17 +27,13 @@ fun QVMAddDev(stateMap: MutableMap<String, Any>, onAdded: (Int) -> Unit) {
             nList.add(mutableStateMapOf("enabled" to true, "device" to "virtio-net-pci", "proto" to "tcp", "ports" to "2222-:22"))
             onAdded(3 + dList.size + cdList.size + nList.size - 1)
         }
-        if (stateMap["display_enabled"] != true) ALSButton(R.drawable.crop_landscape) {
+        if (stateMap["display_enabled"] != true) ALSButton(R.drawable.square) {
             stateMap["display_enabled"] = true
             onAdded(3 + dList.size + cdList.size + nList.size)
         }
         if (stateMap["audio_enabled"] != true) ALSButton(R.drawable.volume_up) {
             stateMap["audio_enabled"] = true
             onAdded(3 + dList.size + cdList.size + nList.size + (if(stateMap["display_enabled"] == true) 1 else 0))
-        }
-        if (stateMap["usb_enabled"] != true) ALSButton(R.drawable.usb) {
-            stateMap["usb_enabled"] = true
-            onAdded(3 + dList.size + cdList.size + nList.size + (if(stateMap["display_enabled"] == true) 1 else 0) + (if(stateMap["audio_enabled"] == true) 1 else 0))
         }
     }
 }

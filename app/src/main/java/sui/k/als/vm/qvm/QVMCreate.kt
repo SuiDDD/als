@@ -94,7 +94,7 @@ fun QVMCreate(config: QVMConfig? = null, onBack: () -> Unit) {
         repeat(cdroms.size) { list.add(R.drawable.album) }
         repeat(disks.size) { list.add(R.drawable.hard_drive) }
         repeat(networks.size) { list.add(R.drawable.wifi) }
-        list.add(R.drawable.crop_landscape)
+        list.add(R.drawable.square)
         if (qvmMap["audio"] == 1) list.add(R.drawable.volume_up)
         list.add(R.drawable.add)
         list.add(R.drawable.preview)

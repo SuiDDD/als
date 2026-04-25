@@ -26,7 +26,7 @@ fun CVMCreate(configuration: CVMConfig? = null, onBack: () -> Unit) {
             R.drawable.chips,
             R.drawable.memory,
             R.drawable.hard_drive,
-            R.drawable.crop_landscape,
+            R.drawable.square,
             R.drawable.preview
         )
     }
