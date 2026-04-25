@@ -56,7 +56,7 @@ fun cmd(cmd: String) {
 }
 
 @Composable
-fun TTYScreen(instance: TTYInstance) {
+fun TTYScreen(instance: TTYInstance, content: @Composable () -> Unit = {}) {
     val density = LocalDensity.current
     val termView = instance.view
     val termSession = instance.session
@@ -74,16 +74,17 @@ fun TTYScreen(instance: TTYInstance) {
                 .background(Color.Black)
         ) {
             AndroidView(
-                factory = { termView },
-                modifier = Modifier
+                factory = { termView }, modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = if (IMEState.isFloating) 0.dp else imePadding + with(density) { imeHeightPx.toDp() }),
-                update = { it.onScreenUpdated() })
+                    .padding(
+                        bottom = if (imeHeightPx == 0 || IMEState.isFloating) 0.dp else imePadding + with(
+                            density
+                        ) { imeHeightPx.toDp() }), update = { it.onScreenUpdated() })
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = imePadding)
-                    .onGloballyPositioned { imeHeightPx = it.size.height }) { TTYIME() }
+                    .onGloballyPositioned { imeHeightPx = it.size.height }) { content() }
         }
     }
 }
@@ -108,7 +109,7 @@ fun createTTYInstance(
         setTextSize(18)
         setTypeface(
             try {
-                Typeface.createFromAsset(context.assets, "fonts/GoogleSansCode.ttf")
+                Typeface.createFromAsset(context.assets, "font/GoogleSansCode.ttf")
             } catch (_: Exception) {
                 Typeface.MONOSPACE
             }

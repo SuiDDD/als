@@ -27,6 +27,8 @@
     <string name="memory">Memory</string>
     <string name="memory_size">Memory Size</string>
     <string name="network">Network</string>
+    <string name="network_backend">Network Backend</string>
+    <string name="network_card">Network Card</string>
     <string name="network_device">Network Device</string>
     <string name="network_protocol">Network Protocol</string>
     <string name="nice_value">Nice Value</string>
@@ -57,4 +59,5 @@
     <string name="alloc_size">Alloc Size</string>
     <string name="force_alloc">Force Alloc</string>
     <string name="mem_lock">Mem Lock</string>
+    <string name="add_cdrom">Add CD-ROM</string>
 </resources>

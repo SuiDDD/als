@@ -1,0 +1,20 @@
+<!--
+  ~ Copyright (C) 2026 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:height="24dp" android:tint="#000000" android:viewportHeight="960" android:viewportWidth="960" android:width="24dp">
+      
+    <path android:fillColor="@android:color/white" android:pathData="M212.31,820Q182.39,820 161.19,798.81Q140,777.61 140,747.69L140,212.31Q140,182.39 161.19,161.19Q182.39,140 212.31,140L747.69,140Q777.61,140 798.81,161.19Q820,182.39 820,212.31L820,747.69Q820,777.61 798.81,798.81Q777.61,820 747.69,820L212.31,820ZM212.31,760L747.69,760Q753.08,760 756.54,756.54Q760,753.08 760,747.69L760,280L200,280L200,747.69Q200,753.08 203.46,756.54Q206.92,760 212.31,760ZM348.12,621.08Q289.77,582.15 261.92,520Q289.77,457.85 348.12,418.92Q406.46,380 480,380Q553.54,380 611.88,418.92Q670.23,457.85 698.08,520Q670.23,582.15 611.88,621.08Q553.54,660 480,660Q406.46,660 348.12,621.08ZM575.27,587.92Q618.77,563.54 645.92,520Q618.77,476.46 575.27,452.08Q531.77,427.69 480,427.69Q428.23,427.69 384.73,452.08Q341.23,476.46 314.08,520Q341.23,563.54 384.73,587.92Q428.23,612.31 480,612.31Q531.77,612.31 575.27,587.92ZM480,520Q480,520 480,520Q480,520 480,520Q480,520 480,520Q480,520 480,520Q480,520 480,520Q480,520 480,520Q480,520 480,520Q480,520 480,520ZM517.11,557.11Q532.31,541.92 532.31,520Q532.31,498.08 517.11,482.89Q501.92,467.69 480,467.69Q458.08,467.69 442.89,482.89Q427.69,498.08 427.69,520Q427.69,541.92 442.89,557.11Q458.08,572.31 480,572.31Q501.92,572.31 517.11,557.11Z"/>
+    
+</vector>

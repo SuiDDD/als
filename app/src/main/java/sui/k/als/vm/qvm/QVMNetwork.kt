@@ -1,37 +1,49 @@
 package sui.k.als.vm.qvm
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.layout.Column
+import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import sui.k.als.R
-import sui.k.als.vm.ToggleCell
+import sui.k.als.ui.ALSList
+import sui.k.als.boot.alsPath
+import sui.k.als.boot.su
+import java.util.Scanner
 
 @Composable
-fun QVMNetwork(stateMap: MutableMap<String, Any>) {
-    LaunchedEffect(Unit) {
-        if (stateMap["network_enabled"] == null) stateMap["network_enabled"] = false
-        if (stateMap["network_protocol"] == null) stateMap["network_protocol"] = "tcp"
-        if (stateMap["network_port"] == null) stateMap["network_port"] = "2222-:22"
+fun QVMNetwork(state: MutableMap<String, Any>) {
+    var showDeviceDiscovery by remember { mutableStateOf(false) }
+    var deviceList by remember { mutableStateOf(listOf<String>()) }
+    var showBackendSelection by remember { mutableStateOf(false) }
+    val backendList = listOf("user", "tap")
+    var showProtocolSelection by remember { mutableStateOf(false) }
+    val protocolList = listOf("tcp", "udp")
+
+    val dev = state["device"]?.toString() ?: "virtio-net-pci"
+    val backend = state["backend"]?.toString() ?: "user"
+    val protocol = state["protocol"]?.toString() ?: "tcp"
+    val ports = state["ports"]?.toString() ?: "2222-:22"
+
+    Column {
+        ALSList(stringResource(R.string.network_device), value = dev, first = true) {
+            val qvmPath = "$alsPath/app/qvm"
+            val discoveryCommand = "LD_LIBRARY_PATH=$qvmPath/libs $qvmPath/qemu-system-aarch64 -M virt -device help 2>&1 | sed -n '/Network devices:/,/^$/p' | sed '1d' | awk -F'[\\\\\" ,]' '{print \$3}'"
+            try {
+                val discoveryProcess = Runtime.getRuntime().exec(arrayOf(su, "-c", discoveryCommand))
+                deviceList = Scanner(discoveryProcess.inputStream).useDelimiter("\n").asSequence().filter { it.isNotBlank() }.toList()
+                showDeviceDiscovery = true
+            } catch (_: Exception) {}
+        }
+        ALSList(stringResource(R.string.network_backend), value = backend) { showBackendSelection = true }
+        if (backend == "user") {
+            ALSList(stringResource(R.string.network_protocol), value = protocol) { showProtocolSelection = true }
+            ALSList(stringResource(R.string.port_forwarding), value = ports, last = true, backgrounds = if(ports.isEmpty()) Color.Red else null) { state["ports"] = it }
+        } else {
+            ALSList(stringResource(R.string.network_backend), value = backend, last = true) { showBackendSelection = true }
+        }
     }
-    LaunchedEffect(
-        stateMap["network_enabled"], stateMap["network_protocol"], stateMap["network_port"]
-    ) {
-        val enabled = stateMap["network_enabled"] == true
-        val proto = stateMap["network_protocol"]?.toString() ?: "tcp"
-        val ports = stateMap["network_port"]?.toString()?.split(",") ?: listOf("2222-:22")
-        val hostfwdCmd = ports.joinToString(" ") { ",hostfwd=$proto::$it" }
-        stateMap["network"] =
-            if (enabled) "-netdev user,id=net0$hostfwdCmd -device virtio-net-pci,netdev=net0,disable-legacy=on,disable-modern=off " else ""
-    }
-    ToggleCell(
-        stringResource(R.string.network_device), stateMap["network_enabled"] == true
-    ) { stateMap["network_enabled"] = it }
-    if (stateMap["network_enabled"] == true) {
-        QVMList(
-            listOf(
-                R.string.network_protocol to "network_protocol",
-                R.string.port_forwarding to "network_port"
-            ), stateMap
-        )
-    }
+
+    ALSList(data = deviceList, show = showDeviceDiscovery, onDismiss = { showDeviceDiscovery = false }) { state["device"] = it }
+    ALSList(data = backendList, show = showBackendSelection, onDismiss = { showBackendSelection = false }) { state["backend"] = it }
+    ALSList(data = protocolList, show = showProtocolSelection, onDismiss = { showProtocolSelection = false }) { state["protocol"] = it }
 }

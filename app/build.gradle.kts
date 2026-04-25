@@ -4,7 +4,7 @@ plugins {
 }
 android {
     namespace = "sui.k.als"
-    compileSdkPreview = "CANARY"
+    compileSdk= 37
     defaultConfig {
         applicationId = "sui.k.als"
         minSdk = 33
@@ -70,6 +70,7 @@ android {
     experimentalProperties["android.experimental.r8.fullMode"] = true
 }
 dependencies {
+    implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

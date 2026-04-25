@@ -1,20 +1,11 @@
 package sui.k.als.vm.qvm
-
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import sui.k.als.R
-
+import sui.k.als.ui.ALSList
 @Composable
-fun QVMArchive(stateMap: MutableMap<String, Any>) {
-    val name = stateMap["name"]?.toString() ?: ""
-    val niceValue = stateMap["nice"]?.toString()?.takeIf { it.isNotEmpty() } ?: "-20"
-    LaunchedEffect(Unit) {
-        if (stateMap["name"] == null) stateMap["name"] = ""
-        if (stateMap["nice"] == null) stateMap["nice"] = "-20"
-    }
-    LaunchedEffect(name, niceValue) {
-        stateMap["archive"] =
-            "nice -n $niceValue taskset $(printf '%x' $(( (1 << $(nproc)) - 1 ))) "
-    }
-    QVMList(listOf(R.string.cfg_name to "name", R.string.nice_value to "nice"), stateMap)
+fun QVMArchive(state: MutableMap<String, Any>) {
+    val name = state["name"]?.toString() ?: ""
+    ALSList(stringResource(R.string.cfg_name), value = name, first = true, last = true, backgrounds = if (name.isEmpty()) Color.Red else null, onValueChange = { state["name"] = it })
 }

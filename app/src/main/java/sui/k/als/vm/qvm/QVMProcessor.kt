@@ -1,30 +1,21 @@
 package sui.k.als.vm.qvm
-
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
+import androidx.compose.ui.res.stringResource
 import sui.k.als.R
-
+import sui.k.als.ui.ALSList
 @Composable
-fun QVMProcessor(stateMap: MutableMap<String, Any>) {
-    LaunchedEffect(Unit) {
-        if (stateMap["smp"] == null) stateMap["smp"] = "$(nproc)"
-        if (stateMap["sockets"] == null) stateMap["sockets"] = "1"
-        if (stateMap["cores"] == null) stateMap["cores"] = "$(nproc)"
-        if (stateMap["threads"] == null) stateMap["threads"] = "1"
+fun QVMProcessor(state: MutableMap<String, Any>) {
+    val cores = state["cores"]?.toString() ?: "$(nproc)"
+    val threads = state["threads"]?.toString() ?: "1"
+    val sockets = state["sockets"]?.toString() ?: "1"
+    val smp = state["smp"]?.toString() ?: "$(nproc)"
+    
+    LaunchedEffect(cores, threads, sockets, smp) {
+        state["processor"] = "-smp cores=$cores,threads=$threads,sockets=$sockets,$smp "
     }
-    LaunchedEffect(stateMap["smp"], stateMap["sockets"], stateMap["cores"], stateMap["threads"]) {
-        val smp = stateMap["smp"] ?: "$(nproc)"
-        val sockets = stateMap["sockets"] ?: "1"
-        val cores = stateMap["cores"] ?: "$(nproc)"
-        val threads = stateMap["threads"] ?: "1"
-        stateMap["processor"] = "-smp $smp,sockets=$sockets,cores=$cores,threads=$threads "
-    }
-    QVMList(
-        listOf(
-            R.string.smp to "smp",
-            R.string.cpu_cores to "cores",
-            R.string.cpu_sockets to "sockets",
-            R.string.cpu_threads to "threads"
-        ), stateMap
-    )
+
+    ALSList(stringResource(R.string.cpu_cores), value = cores, first = true, onValueChange = { state["cores"] = it })
+    ALSList(stringResource(R.string.cpu_threads), value = threads, onValueChange = { state["threads"] = it })
+    ALSList(stringResource(R.string.cpu_sockets), value = sockets, onValueChange = { state["sockets"] = it })
+    ALSList(stringResource(R.string.smp), value = smp, last = true, onValueChange = { state["smp"] = it })
 }

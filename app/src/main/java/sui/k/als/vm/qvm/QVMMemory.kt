@@ -1,52 +1,39 @@
 package sui.k.als.vm.qvm
-
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import sui.k.als.R
-import sui.k.als.vm.ToggleCell
-
+import sui.k.als.ui.ALSList
 @Composable
-fun QVMMemory(stateMap: MutableMap<String, Any>) {
-    LaunchedEffect(Unit) {
-        if (stateMap["mem"] == null) stateMap["mem"] = "6G"
-        if (stateMap["swiotlb"] == null) stateMap["swiotlb"] = "64M"
-        if (stateMap["prealloc_size"] == null) stateMap["prealloc_size"] = "6G"
-    }
-    LaunchedEffect(
-        stateMap["mem"],
-        stateMap["swiotlb"],
-        stateMap["prealloc"],
-        stateMap["prealloc_size"],
-        stateMap["force_prealloc"],
-        stateMap["mem_lock"]
-    ) {
-        val mem = stateMap["mem"] ?: "6G"
-        val swiotlb = stateMap["swiotlb"] ?: "64M"
-        var cmd = " -m $mem -object arm-confidential-guest,id=prot0,swiotlb-size=$swiotlb "
-        if (stateMap["prealloc"] == true) {
-            val size = stateMap["prealloc_size"]?.toString() ?: "6G"
-            val mbSize = if (size.endsWith("G")) (size.removeSuffix("G")
-                .toInt() * 1024).toString() + "M" else size
-            cmd += "-object memory-backend-ram,id=mem,size=$mbSize,prealloc=on "
-            if (stateMap["force_prealloc"] == true) cmd += "-mem-prealloc "
-            if (stateMap["mem_lock"] == true) cmd += "-overcommit mem-lock=on "
+fun QVMMemory(state: MutableMap<String, Any>) {
+    if (state["mem"] == null) state["mem"] = "6G"
+    if (state["swiotlb"] == null) state["swiotlb"] = "64M"
+    LaunchedEffect(state["mem"], state["swiotlb"], state["prealloc_size"], state["prealloc"], state["force"], state["lock"]) {
+        val mem = state["mem"].toString(); val sw = state["swiotlb"].toString()
+        var memCmd = "-m $mem "
+        var objCmd = "-object arm-confidential-guest,id=prot0,swiotlb-size=$sw "
+        if (state["prealloc"] == true) {
+            val sz = state["prealloc_size"]?.toString() ?: "6G"
+            val mb = if (sz.endsWith("G")) (sz.removeSuffix("G").toInt() * 1024).toString() + "M" else sz
+            objCmd += "-object memory-backend-ram,id=mem,size=$mb,prealloc=on "
+            if (state["force"] == true) memCmd += "-mem-prealloc "
+            if (state["lock"] == true) memCmd += "-overcommit mem-lock=on "
         }
-        stateMap["memory"] = cmd
+        state["memory"] = memCmd
+        state["objects"] = objCmd
     }
-    QVMList(
-        listOf(R.string.memory_size to "mem", R.string.swiotlb_buffer_size to "swiotlb"), stateMap
-    )
-    ToggleCell(
-        stringResource(R.string.prealloc), stateMap["prealloc"] == true
-    ) { stateMap["prealloc"] = it }
-    if (stateMap["prealloc"] == true) {
-        QVMList(listOf(R.string.alloc_size to "prealloc_size"), stateMap)
-        ToggleCell(
-            stringResource(R.string.force_alloc), stateMap["force_prealloc"] == true
-        ) { stateMap["force_prealloc"] = it }
-        ToggleCell(
-            stringResource(R.string.mem_lock), stateMap["mem_lock"] == true
-        ) { stateMap["mem_lock"] = it }
+    val pre = state["prealloc"] == true
+    val mem = state["mem"]?.toString() ?: ""
+    val sw = state["swiotlb"]?.toString() ?: ""
+    val ps = state["prealloc_size"]?.toString() ?: ""
+
+    ALSList(stringResource(R.string.memory_size), value = mem, first = true, backgrounds = if (mem.isEmpty()) Color.Red else null, onValueChange = { state["mem"] = it })
+    ALSList(stringResource(R.string.swiotlb_buffer_size), value = sw, backgrounds = if (sw.isEmpty()) Color.Red else null, onValueChange = { state["swiotlb"] = it })
+    
+    ALSList(stringResource(R.string.prealloc), checked = pre, last = !pre) { state["prealloc"] = state["prealloc"] != true }
+    if (pre) {
+        ALSList(stringResource(R.string.alloc_size), value = ps, backgrounds = if (ps.isEmpty()) Color.Red else null, onValueChange = { state["prealloc_size"] = it })
+        ALSList(stringResource(R.string.force_alloc), checked = state["force"] == true) { state["force"] = state["force"] != true }
+        ALSList(stringResource(R.string.mem_lock), checked = state["lock"] == true, last = true) { state["lock"] = state["lock"] != true }
     }
 }
