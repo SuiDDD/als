@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
 import org.json.JSONArray
 import org.json.JSONObject
-import sui.k.als.boot.alsPath
+import sui.k.als.alsPath
 import sui.k.als.localFont
 object QVMPreview {
     const val qvmPath = "$alsPath/app/qvm"

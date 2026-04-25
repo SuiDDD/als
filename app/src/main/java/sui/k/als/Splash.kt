@@ -1,5 +1,6 @@
-package sui.k.als.boot
+package sui.k.als
 
+import android.view.ViewGroup
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -49,7 +50,6 @@ fun Splash(
             cmd(su)
             cmd("clear")
         }
-        delay(900)
         showIcon = true
         delay(1800)
         onTimeout?.invoke()
@@ -57,13 +57,13 @@ fun Splash(
     Box(modifier.fillMaxSize(), Alignment.Center) {
         active?.let { tty ->
             AndroidView(factory = {
-                (tty.view.parent as? android.view.ViewGroup)?.removeView(tty.view)
+                (tty.view.parent as? ViewGroup)?.removeView(tty.view)
                 tty.view
             }, modifier = Modifier.fillMaxSize(), update = { it.onScreenUpdated() })
         }
         if (showIcon) {
             Box(Modifier.fillMaxSize(), Alignment.Center) {
-                ALSButton(appIcon, iSize = 27.dp)
+                ALSButton(appIcon, iconSize = 27.dp)
             }
         }
     }

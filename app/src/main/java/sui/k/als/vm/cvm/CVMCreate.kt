@@ -1,7 +1,7 @@
 package sui.k.als.vm.cvm
 import androidx.compose.runtime.*
 import sui.k.als.R
-import sui.k.als.boot.alsPath
+import sui.k.als.alsPath
 import sui.k.als.vm.CVMConfig
 import sui.k.als.vm.ExpressiveCanvas
 import java.io.DataOutputStream

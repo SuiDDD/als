@@ -5,8 +5,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import sui.k.als.R
 import sui.k.als.ui.ALSList
-import sui.k.als.boot.alsPath
-import sui.k.als.boot.su
+import sui.k.als.alsPath
+import sui.k.als.su
 import java.util.Scanner
 @Composable
 fun QVMDisplay(state: MutableMap<String, Any>) {
@@ -27,7 +27,8 @@ fun QVMDisplay(state: MutableMap<String, Any>) {
     Column {
         ALSList(data = stringResource(R.string.display_device), value = device, first = true) {
             val qvmPath = "$alsPath/app/qvm"
-            val discoveryCommand = "LD_LIBRARY_PATH=$qvmPath/libs $qvmPath/qemu-system-aarch64 -M virt -device help 2>&1 | sed -n '/Display devices:/,/^$/p' | sed '1d' | awk -F'[\\\" ,]' '{print \$3}'"
+            val discoveryCommand =
+                $$"LD_LIBRARY_PATH=$$qvmPath/libs $$qvmPath/qemu-system-aarch64 -M virt -device help 2>&1 | sed -n '/Display devices:/,/^$/p' | sed '1d' | awk -F'[\\\" ,]' '{print $3}'"
             try {
                 val discoveryProcess = Runtime.getRuntime().exec(arrayOf(su, "-c", discoveryCommand))
                 deviceList = Scanner(discoveryProcess.inputStream).useDelimiter("\n").asSequence().filter { it.isNotBlank() }.toList()
@@ -38,5 +39,5 @@ fun QVMDisplay(state: MutableMap<String, Any>) {
         ALSList(data = stringResource(R.string.yres), value = yres, backgrounds = if (yres.isEmpty()) Color.Red else null, onValueChange = { state["yres"] = it })
         ALSList(data = stringResource(R.string.vnc_port), value = vncPort, last = true, backgrounds = if (vncPort.isEmpty()) Color.Red else null, onValueChange = { state["vnc_port"] = it })
     }
-    ALSList(data = deviceList, show = showDeviceDiscovery, onDismiss = { showDeviceDiscovery = false }) { state["display_device"] = it }
+    ALSList(data = deviceList, show = showDeviceDiscovery, onDismiss = { }) { state["display_device"] = it }
 }

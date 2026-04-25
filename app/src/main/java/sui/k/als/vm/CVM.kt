@@ -26,9 +26,9 @@ import kotlinx.coroutines.launch
 import org.json.JSONObject
 import sui.k.als.R
 import sui.k.als.ui.ALSButton
-import sui.k.als.boot.alsPath
-import sui.k.als.boot.su
+import sui.k.als.alsPath
 import sui.k.als.localFont
+import sui.k.als.su
 import sui.k.als.tty.*
 import sui.k.als.vm.cvm.CVMCreate
 import java.io.File

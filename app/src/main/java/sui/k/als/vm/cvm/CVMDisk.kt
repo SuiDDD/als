@@ -4,7 +4,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.res.stringResource
 import sui.k.als.R
 import sui.k.als.ui.ALSList
-import sui.k.als.boot.alsPath
+import sui.k.als.alsPath
 @Composable
 fun CVMDisk(stateMap: MutableMap<String, Any>) {
     LaunchedEffect(stateMap["disk_path"], stateMap["bios_path"], stateMap["balloon"]) {

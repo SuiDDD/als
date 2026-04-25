@@ -6,8 +6,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import sui.k.als.R
 import sui.k.als.ui.ALSList
-import sui.k.als.boot.alsPath
-import sui.k.als.boot.su
+import sui.k.als.alsPath
+import sui.k.als.su
 import java.util.Scanner
 
 @Composable
@@ -27,7 +27,8 @@ fun QVMNetwork(state: MutableMap<String, Any>) {
     Column {
         ALSList(stringResource(R.string.network_device), value = dev, first = true) {
             val qvmPath = "$alsPath/app/qvm"
-            val discoveryCommand = "LD_LIBRARY_PATH=$qvmPath/libs $qvmPath/qemu-system-aarch64 -M virt -device help 2>&1 | sed -n '/Network devices:/,/^$/p' | sed '1d' | awk -F'[\\\\\" ,]' '{print \$3}'"
+            val discoveryCommand =
+                $$"LD_LIBRARY_PATH=$$qvmPath/libs $$qvmPath/qemu-system-aarch64 -M virt -device help 2>&1 | sed -n '/Network devices:/,/^$/p' | sed '1d' | awk -F'[\\\\\" ,]' '{print $3}'"
             try {
                 val discoveryProcess = Runtime.getRuntime().exec(arrayOf(su, "-c", discoveryCommand))
                 deviceList = Scanner(discoveryProcess.inputStream).useDelimiter("\n").asSequence().filter { it.isNotBlank() }.toList()
@@ -43,7 +44,7 @@ fun QVMNetwork(state: MutableMap<String, Any>) {
         }
     }
 
-    ALSList(data = deviceList, show = showDeviceDiscovery, onDismiss = { showDeviceDiscovery = false }) { state["device"] = it }
-    ALSList(data = backendList, show = showBackendSelection, onDismiss = { showBackendSelection = false }) { state["backend"] = it }
-    ALSList(data = protocolList, show = showProtocolSelection, onDismiss = { showProtocolSelection = false }) { state["protocol"] = it }
+    ALSList(data = deviceList, show = showDeviceDiscovery, onDismiss = { }) { state["device"] = it }
+    ALSList(data = backendList, show = showBackendSelection, onDismiss = { }) { state["backend"] = it }
+    ALSList(data = protocolList, show = showProtocolSelection, onDismiss = { }) { state["protocol"] = it }
 }

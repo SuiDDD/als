@@ -16,8 +16,6 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import sui.k.als.boot.Hub
-import sui.k.als.boot.Splash
 
 val localFont = staticCompositionLocalOf<FontFamily> { FontFamily.Default }
 
@@ -41,9 +39,10 @@ class MainActivity : ComponentActivity() {
             }
             var showSplash by rememberSaveable { mutableStateOf(true) }
             CompositionLocalProvider(localFont provides font) {
-                Box {
+                if (showSplash) {
+                    Splash { showSplash = false }
+                } else {
                     Hub { finish() }
-                    if (showSplash) Splash { showSplash = false }
                 }
             }
         }

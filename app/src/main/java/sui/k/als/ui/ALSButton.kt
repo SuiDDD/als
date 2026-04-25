@@ -28,13 +28,13 @@ import androidx.compose.foundation.Image
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ALSButton(icon: Any?, modifier: Modifier = Modifier, size: Dp = 27.dp, iSize: Dp = 18.dp, rad: Dp = 9.dp, regColor: Color = Color.DarkGray, pressedColor: Color = Color.Gray, iconTint: Color = Color.White, longClick: (() -> Unit)? = null, click: () -> Unit = {}) {
+fun ALSButton(icon: Any?, modifier: Modifier = Modifier, size: Dp = 27.dp, iconSize: Dp = 18.dp, rad: Dp = 9.dp, regColor: Color = Color.DarkGray, pressedColor: Color = Color.Gray, iconTint: Color = Color.White, longClick: (() -> Unit)? = null, click: () -> Unit = {}) {
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     Box(modifier.size(size).clip(RoundedCornerShape(rad)).background(if (pressed) pressedColor else regColor).combinedClickable(interaction, null, onLongClick = longClick, onClick = click), Alignment.Center) {
         when (icon) {
-            is Int -> Icon(painterResource(icon), null, Modifier.size(iSize), iconTint)
-            is ImageBitmap -> Image(icon, null, Modifier.size(iSize))
+            is Int -> Icon(painterResource(icon), null, Modifier.size(iconSize), iconTint)
+            is ImageBitmap -> Image(icon, null, Modifier.size(iconSize))
             is String -> Text(icon, color = iconTint, fontSize = 9.sp, fontFamily = localFont.current)
         }
     }

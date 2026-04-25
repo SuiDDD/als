@@ -41,10 +41,10 @@ import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 import sui.k.als.R
-import sui.k.als.boot.Splash
-import sui.k.als.boot.alsPath
-import sui.k.als.boot.su
+import sui.k.als.Splash
+import sui.k.als.alsPath
 import sui.k.als.localFont
+import sui.k.als.su
 import sui.k.als.tty.TTYIME
 import sui.k.als.tty.TTYInstance
 import sui.k.als.tty.TTYScreen

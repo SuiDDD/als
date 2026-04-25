@@ -3,7 +3,7 @@ package sui.k.als.vm.qvm
 import androidx.compose.runtime.*
 import org.json.JSONArray
 import sui.k.als.R
-import sui.k.als.boot.su
+import sui.k.als.su
 import sui.k.als.vm.ExpressiveCanvas
 import sui.k.als.vm.QVMConfig
 

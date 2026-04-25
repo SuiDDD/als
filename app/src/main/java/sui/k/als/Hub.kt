@@ -1,4 +1,4 @@
-package sui.k.als.boot
+package sui.k.als
 
 import android.app.Activity
 import android.view.MotionEvent
@@ -6,7 +6,6 @@ import android.view.inputmethod.InputMethodManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
@@ -14,7 +13,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.*
 import com.termux.terminal.TerminalSession
 import kotlinx.coroutines.*
-import sui.k.als.R
 import sui.k.als.tty.*
 import sui.k.als.ui.ALSButton
 

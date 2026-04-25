@@ -1,4 +1,4 @@
-package sui.k.als.boot
+package sui.k.als
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
-import sui.k.als.R
+import sui.k.als.set.Set
 import sui.k.als.ui.ALSButton
 import sui.k.als.vm.CVM
 import sui.k.als.vm.QVM
@@ -23,6 +23,7 @@ import sui.k.als.vm.QVM
 fun App() {
     val (showQVM, setShowQVM) = remember { mutableStateOf(false) }
     val (showCVM, setShowCVM) = remember { mutableStateOf(false) }
+    val (showSet, setShowSet) = remember { mutableStateOf(false) }
 
     Box(
         Modifier
@@ -32,11 +33,12 @@ fun App() {
         when {
             showQVM -> QVM { setShowQVM(false) }
             showCVM -> CVM { setShowCVM(false) }
+            showSet -> Set { setShowSet(false) }
             else -> Box(Modifier.fillMaxSize(), Alignment.Center) {
                 Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
                     ALSButton("Q") { setShowQVM(true) }
                     ALSButton("C") { setShowCVM(true) }
-                    ALSButton(R.drawable.settings)
+                    ALSButton(R.drawable.settings) { setShowSet(true) }
                 }
             }
         }
