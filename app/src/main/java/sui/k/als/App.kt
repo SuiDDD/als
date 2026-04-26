@@ -1,21 +1,16 @@
 package sui.k.als
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import sui.k.als.set.Set
 import sui.k.als.tty.txc
@@ -29,26 +24,17 @@ fun App() {
     val (showCVM, setShowCVM) = remember { mutableStateOf(false) }
     val (showSet, setShowSet) = remember { mutableStateOf(false) }
 
-    Box(
-        Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-            .pointerInput(Unit) { detectTapGestures { } }) {
+    Box(Modifier.fillMaxSize().background(Color.Black)) {
         when {
             showQVM -> QVM { setShowQVM(false) }
             showCVM -> CVM { setShowCVM(false) }
             showSet -> Set { setShowSet(false) }
             else -> Box(Modifier.fillMaxSize(), Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            ALSButton("Q", iconTint = Color(0xFFFD6500)) { setShowQVM(true) }
-                            Spacer(Modifier.height(9.dp))
-                            ALSButton("C") { txc("uname -a") }
-                        }
-                        ALSButton("C", iconTint = Color(0xFF37AAC6)) { setShowCVM(true) }
-                        ALSButton(R.drawable.settings) { setShowSet(true) }
-                    }
+                Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                    ALSButton("Q", iconTint = Color(0xFFFD6500)) { setShowQVM(true) }
+                    ALSButton("C", iconTint = Color(0xFF37AAC6)) { setShowCVM(true) }
+                    ALSButton("C") { txc("uname -a") }
+                    ALSButton(R.drawable.settings) { setShowSet(true) }
                 }
             }
         }
