@@ -12,8 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import sui.k.als.chr.qcom.chr
 import sui.k.als.set.Set
-import sui.k.als.tty.txc
 import sui.k.als.ui.ALSButton
 import sui.k.als.vm.CVM
 import sui.k.als.vm.QVM
@@ -23,8 +23,11 @@ fun App() {
     val (showQVM, setShowQVM) = remember { mutableStateOf(false) }
     val (showCVM, setShowCVM) = remember { mutableStateOf(false) }
     val (showSet, setShowSet) = remember { mutableStateOf(false) }
-
-    Box(Modifier.fillMaxSize().background(Color.Black)) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
         when {
             showQVM -> QVM { setShowQVM(false) }
             showCVM -> CVM { setShowCVM(false) }
@@ -33,7 +36,7 @@ fun App() {
                 Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
                     ALSButton("Q", iconTint = Color(0xFFFD6500)) { setShowQVM(true) }
                     ALSButton("C", iconTint = Color(0xFF37AAC6)) { setShowCVM(true) }
-                    ALSButton("C") { txc("uname -a") }
+                    ALSButton("C") { chr() }
                     ALSButton(R.drawable.settings) { setShowSet(true) }
                 }
             }
