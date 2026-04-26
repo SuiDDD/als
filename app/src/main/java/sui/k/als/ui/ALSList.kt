@@ -80,38 +80,55 @@ fun ALSList(
                 ) { onClick(data.toString()) } else it
             }
             .padding(horizontal = 9.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                data.toString(),
-                modifier = if (value != null) Modifier.weight(0.4f) else Modifier,
-                color = if (checked) Color.White else Color.Gray,
-                fontSize = 9.sp,
-                fontFamily = localFont.current
-            )
-            if (value != null) {
-                if (onValueChange != null) {
-                    BasicTextField(
-                        value = value,
-                        onValueChange = onValueChange,
-                        modifier = Modifier.weight(0.6f),
-                        interactionSource = interaction,
-                        singleLine = true,
-                        textStyle = TextStyle(
-                            fontSize = 10.sp,
+            if (value == null && onValueChange != null) {
+                BasicTextField(
+                    value = data.toString(),
+                    onValueChange = onValueChange,
+                    modifier = Modifier.fillMaxWidth(),
+                    interactionSource = interaction,
+                    singleLine = true,
+                    textStyle = TextStyle(
+                        fontSize = 9.sp,
+                        color = Color.White,
+                        fontFamily = localFont.current,
+                        textAlign = TextAlign.Start
+                    ),
+                    cursorBrush = SolidColor(Color.White)
+                )
+            } else {
+                Text(
+                    data.toString(),
+                    modifier = if (value != null) Modifier.weight(0.4f) else Modifier,
+                    color = if (checked) Color.White else Color.Gray,
+                    fontSize = 9.sp,
+                    fontFamily = localFont.current
+                )
+                if (value != null) {
+                    if (onValueChange != null) {
+                        BasicTextField(
+                            value = value,
+                            onValueChange = onValueChange,
+                            modifier = Modifier.weight(0.6f),
+                            interactionSource = interaction,
+                            singleLine = true,
+                            textStyle = TextStyle(
+                                fontSize = 10.sp,
+                                color = Color.White,
+                                fontFamily = localFont.current,
+                                textAlign = TextAlign.End
+                            ),
+                            cursorBrush = SolidColor(Color.White)
+                        )
+                    } else {
+                        Text(
+                            value,
+                            modifier = Modifier.weight(0.6f),
                             color = Color.White,
+                            fontSize = 10.sp,
                             fontFamily = localFont.current,
                             textAlign = TextAlign.End
-                        ),
-                        cursorBrush = SolidColor(Color.White)
-                    )
-                } else {
-                    Text(
-                        value,
-                        modifier = Modifier.weight(0.6f),
-                        color = Color.White,
-                        fontSize = 10.sp,
-                        fontFamily = localFont.current,
-                        textAlign = TextAlign.End
-                    )
+                        )
+                    }
                 }
             }
         }
