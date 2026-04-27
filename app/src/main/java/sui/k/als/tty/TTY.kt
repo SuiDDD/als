@@ -38,21 +38,14 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
 data class TTYInstance(
-    val session: TerminalSession,
-    val view: TerminalView,
-    val initialized: AtomicBoolean = AtomicBoolean(false)
+    val session: TerminalSession, val view: TerminalView
 )
 
 val LocalSession = staticCompositionLocalOf<TerminalSession?> { null }
 internal var ttySession: TerminalSession? = null
-private val ioExecutor = Executors.newSingleThreadExecutor { runnable ->
-    Thread(runnable, "als-io").apply {
-        priority = Thread.MAX_PRIORITY
-    }
-}
-
+private val ttyIO = Executors.newSingleThreadExecutor()
 fun cmd(cmd: String) {
-    ioExecutor.execute { ttySession?.write("$cmd\n") }
+    ttyIO.execute { ttySession?.write("$cmd\n") }
 }
 
 @Composable
@@ -99,7 +92,7 @@ fun createTTYInstance(
             "HOME=$workDir",
             "LANG=en_US.UTF-8",
             "PATH=/system/bin:/system/xbin:$alsPath"
-        ), 300000, sessionClient
+        ), 9216, sessionClient
     )
     val view = TerminalView(context, null).apply {
         isForceDarkAllowed = false
@@ -125,12 +118,19 @@ fun createTTYInstance(
 
 open class TTYSessionStub : TerminalSessionClient {
     private var boundView: TerminalView? = null
+    private val updatePosted = AtomicBoolean(false)
     fun bindView(view: TerminalView) {
         boundView = view
     }
 
     override fun onTextChanged(session: TerminalSession) {
-        boundView?.let { v -> v.post { v.onScreenUpdated(); v.invalidate() } }
+        if (updatePosted.compareAndSet(false, true)) {
+            boundView?.post {
+                updatePosted.set(false)
+                boundView?.onScreenUpdated()
+                boundView?.invalidate()
+            }
+        }
     }
 
     override fun onTitleChanged(session: TerminalSession) {}
@@ -146,14 +146,19 @@ open class TTYSessionStub : TerminalSessionClient {
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboard.primaryClip?.getItemAt(0)?.let { item ->
             val text = item.coerceToText(context).toString()
-            ioExecutor.execute { session?.write(text) }
+            ttyIO.execute { session?.write(text) }
         }
     }
 
     override fun onBell(session: TerminalSession) {}
     override fun onColorsChanged(session: TerminalSession) {}
     override fun onTerminalCursorStateChange(visible: Boolean) {
-        boundView?.post { boundView?.onScreenUpdated() }
+        if (updatePosted.compareAndSet(false, true)) {
+            boundView?.post {
+                updatePosted.set(false)
+                boundView?.onScreenUpdated()
+            }
+        }
     }
 
     override fun getTerminalCursorStyle() = 2
