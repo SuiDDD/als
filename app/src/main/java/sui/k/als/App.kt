@@ -49,7 +49,7 @@ fun App() {
         } else when {
             showQVM -> QVM { showQVM = false }
             showCVM -> CVM { showCVM = false }
-            showChr -> sui.k.als.chr.qcom.Chr(onExit = { showChr = false }, onTTYCreated = { activeTTY = it }, scope = scope)
+            showChr -> sui.k.als.chr.qcom.Chr(onTTYCreated = { activeTTY = it }, scope = scope)
             showSet -> Set { showSet = false }
             else -> Box(Modifier.fillMaxSize(), Alignment.Center) {
                 Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {

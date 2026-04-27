@@ -41,7 +41,7 @@
     <string name="usb">USB</string>
     <string name="usb2_port">USB 2.0 端口数</string>
     <string name="usb3_port">USB 3.0 端口数</string>
-    <string name="vnc_port">VNC 端口</string>
+    <string name="vnc_port">VNC端口</string>
     <string name="xres">水平像素</string>
     <string name="yres">垂直像素</string>
 

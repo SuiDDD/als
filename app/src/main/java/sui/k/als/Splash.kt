@@ -79,7 +79,7 @@ fun Splash(
             cmd("clear")
         }
         showIcon = true
-        delay(1800)
+        delay(900)
         onTimeout?.invoke()
     }
 

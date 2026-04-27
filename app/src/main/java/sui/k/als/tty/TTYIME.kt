@@ -48,9 +48,6 @@ object IMEState {
     fun consumeCtrl() = isCtrlActive
     fun consumeShift() = isShiftActive
     fun consumeAlt() = isAltActive
-    fun resetModifiers() {
-        isCtrlActive = false; isShiftActive = false; isAltActive = false
-    }
 }
 
 private val keyCodes =
@@ -188,21 +185,25 @@ private fun RowScope.KeyBase(
                     } finally {
                         isPressed = false
                     }
+                } else if (isMod) {
+                    val setter: (Boolean) -> Unit = { v ->
+                        when (label) {
+                            "Ctrl" -> IMEState.isCtrlActive = v; "Shift" -> IMEState.isShiftActive =
+                            v; "Alt" -> IMEState.isAltActive = v; "Caps" -> IMEState.isCapsActive =
+                            v
+                        }
+                    }
+                    setter(true)
+                    try {
+                        awaitRelease()
+                    } finally {
+                        setter(false); isPressed = false
+                    }
                 } else {
                     val job = scope.launch {
-                        if (isMod) {
-                            when (label) {
-                                "Ctrl" -> IMEState.isCtrlActive =
-                                    !IMEState.isCtrlActive; "Shift" -> IMEState.isShiftActive =
-                                !IMEState.isShiftActive; "Alt" -> IMEState.isAltActive =
-                                !IMEState.isAltActive; "Caps" -> IMEState.isCapsActive =
-                                !IMEState.isCapsActive
-                            }
-                        } else {
-                            processKey(label); delay(300L); while (true) {
-                                processKey(label); delay(30L)
-                            }
-                        }
+                        processKey(label); delay(270); while (true) {
+                        processKey(label); delay(30)
+                    }
                     }
                     try {
                         awaitRelease()
@@ -234,7 +235,6 @@ private fun processKey(label: String) {
             }
             sendToTTY(if (IMEState.isAltActive) "\u001b$text" else text)
         }
-    IMEState.resetModifiers()
 }
 
 private fun sendToTTY(data: String) = ttySession?.write(data)
