@@ -127,7 +127,7 @@ fun QVM(onExit: () -> Unit) {
                         modifier = Modifier
                             .weight(1f)
                             .padding(horizontal = 9.dp),
-                        contentPadding = PaddingValues(top = 16.dp, bottom = 9.dp),
+                        contentPadding = PaddingValues(top = 9.dp, bottom = 9.dp),
                         verticalArrangement = Arrangement.spacedBy(9.dp)
                     ) {
                         items(configs) { qvm ->
@@ -193,9 +193,9 @@ fun QVMRow(qvm: QVMConfig, onEdit: () -> Unit, onTerm: () -> Unit, onVnc: () -> 
             text = qvm.name,
             modifier = Modifier
                 .weight(1f)
-                .padding(start = 4.dp),
+                .padding(start = 3.dp),
             color = Color.White,
-            fontSize = 12.sp,
+            fontSize = 15.sp,
             fontFamily = localFont.current
         )
         Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
