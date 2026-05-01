@@ -1,7 +1,6 @@
 package sui.k.als.vm.cvm
 
 import androidx.compose.runtime.*
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.res.*
 import sui.k.als.R
 import sui.k.als.ui.*
