@@ -1,37 +1,17 @@
 package sui.k.als
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.edit
-import androidx.core.graphics.drawable.toBitmap
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import sui.k.als.tty.TTYInstance
-import sui.k.als.tty.TTYSessionStub
-import sui.k.als.tty.TTYViewStub
-import sui.k.als.tty.cmd
-import sui.k.als.tty.createTTYInstance
-import sui.k.als.tty.ttySession
-import sui.k.als.ui.ALSButton
+import androidx.compose.ui.*
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.platform.*
+import androidx.compose.ui.unit.*
+import androidx.compose.ui.viewinterop.*
+import androidx.core.content.*
+import androidx.core.graphics.drawable.*
+import kotlinx.coroutines.*
+import sui.k.als.tty.*
 import sui.k.als.ui.*
 
 var suPath by mutableStateOf("su")
@@ -83,7 +63,11 @@ fun Splash(
         onTimeout?.invoke()
     }
 
-    Box(modifier.fillMaxSize().background(Color.Black), Alignment.Center) {
+    Box(
+        modifier
+            .fillMaxSize()
+            .background(Color.Black), Alignment.Center
+    ) {
         active?.let { tty ->
             AndroidView(factory = {
                 val parent = tty.view.parent as? android.view.ViewGroup
@@ -93,7 +77,11 @@ fun Splash(
         }
 
         if (showSuInput) {
-            Box(Modifier.fillMaxSize().background(Color.Black), Alignment.Center) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.Black), Alignment.Center
+            ) {
                 Column(
                     modifier = Modifier.fillMaxWidth(1f / 3f),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -103,8 +91,7 @@ fun Splash(
                         value = inputPath,
                         first = true,
                         last = true,
-                        onValueChange = { inputPath = it }
-                    )
+                        onValueChange = { inputPath = it })
                     Spacer(Modifier.height(9.dp))
                     ALSButton(R.drawable.arrow_forward) {
                         suPath = inputPath
