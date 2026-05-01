@@ -110,21 +110,25 @@ fun CVM(onExit: () -> Unit) {
                                         if (currentTerminalVmName != cvm.name || terminalInstance == null) {
                                             currentTerminalVmName = cvm.name
                                             terminalInstance =
-                                                createTTYInstance(context, object : TTYSessionStub() {
-                                                    override fun onSessionFinished(session: com.termux.terminal.TerminalSession) {
-                                                        terminalInstance = null; showTerminal =
-                                                            false; currentTerminalVmName = null
-                                                    }
-                                                }, object : TTYViewStub() {
-                                                    override fun onSingleTapUp(event: MotionEvent) {
-                                                        (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(
-                                                            terminalInstance?.view, 0
-                                                        )
-                                                    }
-                                                }).also {
+                                                createTTYInstance(
+                                                    context,
+                                                    object : TTYSessionStub() {
+                                                        override fun onSessionFinished(session: com.termux.terminal.TerminalSession) {
+                                                            terminalInstance = null; showTerminal =
+                                                                false; currentTerminalVmName = null
+                                                        }
+                                                    },
+                                                    object : TTYViewStub() {
+                                                        override fun onSingleTapUp(event: MotionEvent) {
+                                                            (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(
+                                                                terminalInstance?.view, 0
+                                                            )
+                                                        }
+                                                    }).also {
                                                     scope.launch {
                                                         delay(100); cmd(su); delay(100)
-                                                        val workingDir = "$alsPath/app/cvm/${cvm.name}"
+                                                        val workingDir =
+                                                            "$alsPath/app/cvm/${cvm.name}"
                                                         cmd("cd $workingDir")
                                                         if (!cvm.isRunning) cmd(cvm.command)
                                                     }
@@ -148,7 +152,6 @@ fun CVM(onExit: () -> Unit) {
         }
     }
 }
-
 
 
 private fun parseConfigFile(file: File) = JSONObject().apply {

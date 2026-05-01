@@ -1,20 +1,24 @@
 package sui.k.als.tty
+
 import android.content.*
-import android.graphics.Typeface
+import android.content.ClipboardManager
+import android.graphics.*
 import android.view.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.*
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.*
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.viewinterop.*
 import com.termux.terminal.*
 import com.termux.view.*
 import java.util.concurrent.*
 import java.util.concurrent.atomic.*
+
 data class TTYInstance(
     val session: TerminalSession, val view: TerminalView
 )

@@ -1,4 +1,5 @@
 package sui.k.als.chr.qcom
+
 import android.view.*
 import android.view.inputmethod.*
 import androidx.activity.compose.*
@@ -15,7 +16,9 @@ import sui.k.als.R
 import sui.k.als.ide.*
 import sui.k.als.tty.*
 import sui.k.als.ui.*
+
 private var chrInstance: TTYInstance? = null
+
 @Composable
 fun Chr(onTTYCreated: (TTYInstance) -> Unit, scope: CoroutineScope) {
     val context = LocalContext.current
@@ -35,7 +38,8 @@ fun Chr(onTTYCreated: (TTYInstance) -> Unit, scope: CoroutineScope) {
             val viewStub = object : TTYViewStub() {
                 override fun onSingleTapUp(event: MotionEvent) {
                     chrInstance?.view?.requestFocus()
-                    context.getSystemService(InputMethodManager::class.java)?.showSoftInput(chrInstance?.view, 0)
+                    context.getSystemService(InputMethodManager::class.java)
+                        ?.showSoftInput(chrInstance?.view, 0)
                 }
             }
             chrInstance = createTTYInstance(context, sessionStub, viewStub)
@@ -53,7 +57,9 @@ fun Chr(onTTYCreated: (TTYInstance) -> Unit, scope: CoroutineScope) {
         Column(Modifier.fillMaxSize()) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(1),
-                modifier = Modifier.weight(1f).padding(9.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(9.dp),
                 contentPadding = PaddingValues(top = 9.dp, bottom = 9.dp)
             ) {
                 itemsIndexed(configs) { index, configItem ->

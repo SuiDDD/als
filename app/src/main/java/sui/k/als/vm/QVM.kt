@@ -1,53 +1,26 @@
 package sui.k.als.vm
 
-import android.content.Context
-import android.content.Intent
-import android.view.MotionEvent
-import android.view.inputmethod.InputMethodManager
-import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Surface
+import android.content.*
+import android.view.*
+import android.view.inputmethod.*
+import androidx.activity.compose.*
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.*
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.*
 import androidx.compose.ui.unit.*
-import androidx.core.net.toUri
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import org.json.JSONArray
-import org.json.JSONObject
+import androidx.core.net.*
+import kotlinx.coroutines.*
+import org.json.*
+import sui.k.als.*
 import sui.k.als.R
-import sui.k.als.Splash
-import sui.k.als.alsPath
-import sui.k.als.su
-import sui.k.als.tty.TTYIME
-import sui.k.als.tty.TTYInstance
-import sui.k.als.tty.TTYScreen
-import sui.k.als.tty.TTYSessionStub
-import sui.k.als.tty.TTYViewStub
-import sui.k.als.tty.cmd
-import sui.k.als.tty.createTTYInstance
-import sui.k.als.tty.ttySession
-import sui.k.als.ui.ALSButton
+import sui.k.als.tty.*
 import sui.k.als.ui.*
-import sui.k.als.vm.qvm.QVMCreate
-import sui.k.als.vm.qvm.QVMPreview
-import java.io.File
+import sui.k.als.vm.qvm.*
+import java.io.*
 
 const val qvmPath = "$alsPath/app/qvm"
 
@@ -132,7 +105,8 @@ fun QVM(onExit: () -> Unit) {
                                                 val port = qvm.raw?.optString("vnc_port") ?: "9000"
                                                 context.startActivity(
                                                     Intent(
-                                                        Intent.ACTION_VIEW, "vnc://localhost:$port".toUri()
+                                                        Intent.ACTION_VIEW,
+                                                        "vnc://localhost:$port".toUri()
                                                     ).apply {
                                                         setPackage("com.gaurav.avnc")
                                                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -143,17 +117,21 @@ fun QVM(onExit: () -> Unit) {
                                         ALSButton(R.drawable.power) {
                                             if (terminalInstance == null) {
                                                 terminalInstance =
-                                                    createTTYInstance(context, object : TTYSessionStub() {
-                                                        override fun onSessionFinished(session: com.termux.terminal.TerminalSession) {
-                                                            terminalInstance = null; showTerminal = false
-                                                        }
-                                                    }, object : TTYViewStub() {
-                                                        override fun onSingleTapUp(event: MotionEvent) {
-                                                            (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(
-                                                                terminalInstance?.view, 0
-                                                            )
-                                                        }
-                                                    }).also {
+                                                    createTTYInstance(
+                                                        context,
+                                                        object : TTYSessionStub() {
+                                                            override fun onSessionFinished(session: com.termux.terminal.TerminalSession) {
+                                                                terminalInstance =
+                                                                    null; showTerminal = false
+                                                            }
+                                                        },
+                                                        object : TTYViewStub() {
+                                                            override fun onSingleTapUp(event: MotionEvent) {
+                                                                (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(
+                                                                    terminalInstance?.view, 0
+                                                                )
+                                                            }
+                                                        }).also {
                                                         ttySession = it.session
                                                         scope.launch {
                                                             delay(90)

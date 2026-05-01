@@ -1,29 +1,18 @@
 ﻿package sui.k.als
-import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import sui.k.als.chr.qcom.Chr
-import sui.k.als.set.Set
-import sui.k.als.tty.TTYIME
-import sui.k.als.tty.TTYInstance
-import sui.k.als.tty.TTYScreen
-import sui.k.als.ui.ALSButton
-import sui.k.als.vm.CVM
-import sui.k.als.vm.QVM
+
+import androidx.activity.compose.*
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.*
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.platform.*
+import androidx.compose.ui.unit.*
+import sui.k.als.chr.qcom.*
+import sui.k.als.set.*
+import sui.k.als.tty.*
+import sui.k.als.ui.*
+import sui.k.als.vm.*
 
 @Composable
 fun App() {
@@ -45,7 +34,11 @@ fun App() {
         }
     }
 
-    Box(Modifier.fillMaxSize().background(Color.Black)) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
         if (activeTTY != null) {
             TTYScreen(activeTTY!!) { TTYIME() }
         } else when {

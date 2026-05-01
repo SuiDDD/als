@@ -66,8 +66,8 @@ fun ALSList(
             .background(backgrounds ?: if (isPressed) Color.Gray else Color(0xFF111111))
             .then(
                 if (onValueChange == null) Modifier.clickable(
-                interaction, null
-            ) { onClick(textData) } else Modifier)
+                    interaction, null
+                ) { onClick(textData) } else Modifier)
             .padding(horizontal = 9.dp),
         verticalAlignment = Alignment.CenterVertically) {
         val style = TextStyle(

@@ -30,8 +30,12 @@ fun About(onBack: () -> Unit) {
             modifier = Modifier
                 .padding(9.dp)
                 .then(
-                    if (isLandscape) Modifier.fillMaxWidth(1f / 3f).fillMaxHeight()
-                    else Modifier.fillMaxWidth().height(configuration.screenHeightDp.dp / 3)
+                    if (isLandscape) Modifier
+                        .fillMaxWidth(1f / 3f)
+                        .fillMaxHeight()
+                    else Modifier
+                        .fillMaxWidth()
+                        .height(configuration.screenHeightDp.dp / 3)
                 )
                 .clip(RoundedCornerShape(9.dp))
                 .drawBehind {

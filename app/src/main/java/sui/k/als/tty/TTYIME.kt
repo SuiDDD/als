@@ -46,11 +46,12 @@ fun TTYIME() {
     BackHandler(IMEState.isFullKeyboardVisible) {
         IMEState.isFloating = false; IMEState.isFullKeyboardVisible = false
     }
-    Box(modifier = if (IMEState.isFloating) Modifier
-        .offset { IMEState.keyboardOffset }
-        .size(360.dp, panelHeight) else Modifier
-        .fillMaxWidth()
-        .wrapContentHeight()) {
+    Box(
+        modifier = if (IMEState.isFloating) Modifier
+            .offset { IMEState.keyboardOffset }
+            .size(360.dp, panelHeight) else Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()) {
         Column(
             Modifier
                 .fillMaxWidth()
@@ -127,71 +128,75 @@ private fun RowScope.KeyBase(
         )) -> label; IMEState.isShiftActive -> symbolMap[label]
             ?: label.uppercase(); IMEState.isCapsActive && label[0].isLetter() -> label.uppercase(); else -> label
     }
-    Box(modifier = Modifier
-        .weight(weight)
-        .fillMaxHeight()
-        .pointerInput(label) {
-            if (isCtrl) detectDragGestures(
-                onDragStart = {
-                isPressed = true; if (IMEState.isFullKeyboardVisible) {
-                IMEState.isFloating = true; view.performHapticFeedback(
-                    HapticFeedbackConstants.LONG_PRESS
-                )
-            }
-            },
-                onDragEnd = { isPressed = false },
-                onDragCancel = { isPressed = false }) { change, drag ->
-                if (IMEState.isFloating) {
-                    change.consume(); IMEState.keyboardOffset += IntOffset(
-                        drag.x.roundToInt(), drag.y.roundToInt()
-                    )
+    Box(
+        modifier = Modifier
+            .weight(weight)
+            .fillMaxHeight()
+            .pointerInput(label) {
+                if (isCtrl) detectDragGestures(
+                    onDragStart = {
+                        isPressed = true; if (IMEState.isFullKeyboardVisible) {
+                        IMEState.isFloating = true; view.performHapticFeedback(
+                            HapticFeedbackConstants.LONG_PRESS
+                        )
+                    }
+                    },
+                    onDragEnd = { isPressed = false },
+                    onDragCancel = { isPressed = false }) { change, drag ->
+                    if (IMEState.isFloating) {
+                        change.consume(); IMEState.keyboardOffset += IntOffset(
+                            drag.x.roundToInt(), drag.y.roundToInt()
+                        )
+                    }
                 }
             }
-        }
-        .pointerInput(label) {
-            detectTapGestures(onPress = {
-                isPressed = true; view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                if (isCtrl) {
-                    try {
-                        awaitRelease(); IMEState.isFullKeyboardVisible =
-                            !IMEState.isFullKeyboardVisible.also {
-                                if (!it) {
-                                    IMEState.isFloating = false; IMEState.keyboardOffset =
-                                        IntOffset.Zero
+            .pointerInput(label) {
+                detectTapGestures(onPress = {
+                    isPressed =
+                        true; view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                    if (isCtrl) {
+                        try {
+                            awaitRelease(); IMEState.isFullKeyboardVisible =
+                                !IMEState.isFullKeyboardVisible.also {
+                                    if (!it) {
+                                        IMEState.isFloating = false; IMEState.keyboardOffset =
+                                            IntOffset.Zero
+                                    }
                                 }
+                        } finally {
+                            isPressed = false
+                        }
+                    } else if (isMod) {
+                        val setter: (Boolean) -> Unit = { v ->
+                            when (label) {
+                                "Ctrl" -> IMEState.isCtrlActive =
+                                    v; "Shift" -> IMEState.isShiftActive =
+                                v; "Alt" -> IMEState.isAltActive =
+                                v; "Caps" -> IMEState.isCapsActive =
+                                v
                             }
-                    } finally {
-                        isPressed = false
-                    }
-                } else if (isMod) {
-                    val setter: (Boolean) -> Unit = { v ->
-                        when (label) {
-                            "Ctrl" -> IMEState.isCtrlActive = v; "Shift" -> IMEState.isShiftActive =
-                            v; "Alt" -> IMEState.isAltActive = v; "Caps" -> IMEState.isCapsActive =
-                            v
+                        }
+                        setter(true)
+                        try {
+                            awaitRelease()
+                        } finally {
+                            setter(false); isPressed = false
+                        }
+                    } else {
+                        val job = scope.launch {
+                            processKey(label); delay(270); while (true) {
+                            processKey(label); delay(30)
+                        }
+                        }
+                        try {
+                            awaitRelease()
+                        } finally {
+                            job.cancel(); isPressed = false
                         }
                     }
-                    setter(true)
-                    try {
-                        awaitRelease()
-                    } finally {
-                        setter(false); isPressed = false
-                    }
-                } else {
-                    val job = scope.launch {
-                        processKey(label); delay(270); while (true) {
-                        processKey(label); delay(30)
-                    }
-                    }
-                    try {
-                        awaitRelease()
-                    } finally {
-                        job.cancel(); isPressed = false
-                    }
-                }
-            })
-        }
-        .background(Color.Transparent), contentAlignment = Alignment.Center) {
+                })
+            }
+            .background(Color.Transparent), contentAlignment = Alignment.Center) {
         Text(
             disp,
             color = if (isPressed || isActive) Color.Gray else Color.White,
