@@ -1,11 +1,10 @@
 package sui.k.als.vm.qvm
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.res.*
 import sui.k.als.R
-import sui.k.als.ui.ALSList
+import sui.k.als.ui.*
 
 @Composable
 fun QVMMemory(state: MutableMap<String, Any>) {

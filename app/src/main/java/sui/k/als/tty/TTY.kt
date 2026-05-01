@@ -1,42 +1,20 @@
 package sui.k.als.tty
-
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
+import android.content.*
 import android.graphics.Typeface
-import android.view.KeyEvent
-import android.view.MotionEvent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
+import android.view.*
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.*
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.layout.*
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import com.termux.terminal.TerminalSession
-import com.termux.terminal.TerminalSessionClient
-import com.termux.view.TerminalView
-import com.termux.view.TerminalViewClient
-import sui.k.als.alsPath
-import java.io.File
-import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicBoolean
-
+import androidx.compose.ui.unit.*
+import androidx.compose.ui.viewinterop.*
+import com.termux.terminal.*
+import com.termux.view.*
+import java.util.concurrent.*
+import java.util.concurrent.atomic.*
 data class TTYInstance(
     val session: TerminalSession, val view: TerminalView
 )
@@ -85,18 +63,9 @@ fun TTYScreen(instance: TTYInstance, content: @Composable () -> Unit = {}) {
 fun createTTYInstance(
     context: Context, sessionClient: TTYSessionStub, viewClient: TTYViewStub
 ): TTYInstance {
-    val workDir = context.filesDir.absolutePath.also { File(it).mkdirs() }
-    val session = TerminalSession(
-        "/system/bin/sh", workDir, arrayOf("-i"), arrayOf(
-            "TERM=xterm-256color",
-            "HOME=$workDir",
-            "LANG=en_US.UTF-8",
-            "PATH=/system/bin:/system/xbin:$alsPath"
-        ), 9216, sessionClient
-    )
+    val session = TerminalSession(TTYENV, 9216, sessionClient)
     val view = TerminalView(context, null).apply {
-        isForceDarkAllowed = false
-        setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
+        setLayerType(View.LAYER_TYPE_HARDWARE, null)
         isFocusable = true
         isFocusableInTouchMode = true
         setTextSize(18)

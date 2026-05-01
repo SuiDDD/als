@@ -1,16 +1,10 @@
 package sui.k.als.vm.cvm
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
+import sui.k.als.*
 import sui.k.als.R
-import sui.k.als.alsPath
-import sui.k.als.vm.CVMConfig
-import sui.k.als.vm.ExpressiveCanvas
-import java.io.DataOutputStream
+import sui.k.als.vm.*
+import java.io.*
 
 @Composable
 fun CVMCreate(configuration: CVMConfig? = null, onBack: () -> Unit) {

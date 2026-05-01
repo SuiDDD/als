@@ -1,49 +1,26 @@
 package sui.k.als.chr.qcom
-import android.view.MotionEvent
-import android.view.inputmethod.InputMethodManager
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.termux.terminal.TerminalSession
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import android.view.*
+import android.view.inputmethod.*
+import androidx.activity.compose.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.*
+import androidx.compose.ui.platform.*
+import androidx.compose.ui.unit.*
+import com.termux.terminal.*
+import kotlinx.coroutines.*
+import sui.k.als.*
 import sui.k.als.R
-import sui.k.als.alsPath
-import sui.k.als.localFont
-import sui.k.als.su
-import sui.k.als.tty.TTYInstance
-import sui.k.als.tty.TTYSessionStub
-import sui.k.als.tty.TTYViewStub
-import sui.k.als.tty.cmd
-import sui.k.als.tty.createTTYInstance
-import sui.k.als.tty.ttySession
-import sui.k.als.ui.ALSButton
+import sui.k.als.ide.*
+import sui.k.als.tty.*
+import sui.k.als.ui.*
 private var chrInstance: TTYInstance? = null
 @Composable
 fun Chr(onTTYCreated: (TTYInstance) -> Unit, scope: CoroutineScope) {
     val context = LocalContext.current
+    BackHandler(idePath != null) { ideOpen(null) }
+    DisposableEffect(Unit) { onDispose { ideOpen(null) } }
     val configs by remember { mutableStateOf(listOf(mapOf("name" to "Debian_Trixie_20260428"))) }
     val chrTerm = {
         if (chrInstance != null) {
@@ -72,28 +49,29 @@ fun Chr(onTTYCreated: (TTYInstance) -> Unit, scope: CoroutineScope) {
             }
         }
     }
-    Column(Modifier.fillMaxSize()) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(1),
-            modifier = Modifier.weight(1f).padding(horizontal = 9.dp),
-            contentPadding = PaddingValues(top = 9.dp, bottom = 9.dp),
-            verticalArrangement = Arrangement.spacedBy(9.dp)
-        ) {
-            items(configs) { configItem ->
-                Row(
-                    Modifier.fillMaxWidth().clip(RoundedCornerShape(9.dp)).background(Color(0xFF111111)).padding(9.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = configItem["name"].toString(),
-                        modifier = Modifier.weight(1f).padding(start = 3.dp),
-                        color = Color.White,
-                        fontSize = 15.sp,
-                        fontFamily = localFont.current
+    Box(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize()) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(1),
+                modifier = Modifier.weight(1f).padding(9.dp),
+                contentPadding = PaddingValues(top = 9.dp, bottom = 9.dp)
+            ) {
+                itemsIndexed(configs) { index, configItem ->
+                    ALSList(
+                        data = configItem["name"].toString(),
+                        first = index == 0,
+                        last = index == configs.size - 1,
+                        onClick = { },
+                        iconContent = {
+                            Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                                ALSButton(R.drawable.edit) { ideOpen("$alsPath/chr.sh") }
+                                ALSButton(R.drawable.power) { chrTerm() }
+                            }
+                        }
                     )
-                    ALSButton(R.drawable.power) { chrTerm() }
                 }
             }
         }
+        IDE()
     }
 }

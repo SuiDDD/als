@@ -1,15 +1,11 @@
 package sui.k.als.vm.cvm
 
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.sp
-import sui.k.als.alsPath
-import sui.k.als.localFont
+import androidx.compose.foundation.text.selection.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.unit.*
+import sui.k.als.*
 
 @Composable
 fun CVMPreview(stateMap: MutableMap<String, Any>) {

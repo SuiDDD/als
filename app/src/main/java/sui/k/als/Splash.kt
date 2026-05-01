@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.edit
 import androidx.core.graphics.drawable.toBitmap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -31,8 +32,7 @@ import sui.k.als.tty.cmd
 import sui.k.als.tty.createTTYInstance
 import sui.k.als.tty.ttySession
 import sui.k.als.ui.ALSButton
-import sui.k.als.ui.ALSList
-import androidx.core.content.edit
+import sui.k.als.ui.*
 
 var suPath by mutableStateOf("su")
 val su get() = suPath
@@ -79,7 +79,7 @@ fun Splash(
             cmd("clear")
         }
         showIcon = true
-        delay(900)
+        delay(300)
         onTimeout?.invoke()
     }
 

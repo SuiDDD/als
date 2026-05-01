@@ -1,13 +1,11 @@
 package sui.k.als.vm.qvm
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.*
+import androidx.compose.ui.unit.*
 import sui.k.als.R
-import sui.k.als.ui.ALSButton
+import sui.k.als.ui.*
 
 @Composable
 fun QVMAddDev(

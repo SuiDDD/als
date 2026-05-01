@@ -1,18 +1,13 @@
 package sui.k.als.vm.qvm
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.res.*
+import sui.k.als.*
 import sui.k.als.R
-import sui.k.als.alsPath
-import sui.k.als.su
-import sui.k.als.ui.ALSList
-import java.util.Scanner
+import sui.k.als.ui.*
+import java.util.*
 
 @Composable
 fun QVMNetwork(state: MutableMap<String, Any>) {

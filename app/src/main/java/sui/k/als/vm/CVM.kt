@@ -1,55 +1,25 @@
 package sui.k.als.vm
 
-import android.content.Context
-import android.view.MotionEvent
-import android.view.inputmethod.InputMethodManager
-import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import org.json.JSONObject
+import android.content.*
+import android.view.*
+import android.view.inputmethod.*
+import androidx.activity.compose.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.*
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.platform.*
+import androidx.compose.ui.unit.*
+import kotlinx.coroutines.*
+import org.json.*
+import sui.k.als.*
 import sui.k.als.R
-import sui.k.als.alsPath
-import sui.k.als.localFont
-import sui.k.als.su
-import sui.k.als.tty.TTYInstance
-import sui.k.als.tty.TTYScreen
-import sui.k.als.tty.TTYSessionStub
-import sui.k.als.tty.TTYViewStub
-import sui.k.als.tty.cmd
-import sui.k.als.tty.createTTYInstance
-import sui.k.als.ui.ALSButton
-import sui.k.als.vm.cvm.CVMCreate
-import java.io.File
+import sui.k.als.tty.*
+import sui.k.als.ui.*
+import sui.k.als.vm.cvm.*
+import java.io.*
 
 data class CVMConfig(
     val name: String,
@@ -126,37 +96,44 @@ fun CVM(onExit: () -> Unit) {
                         columns = GridCells.Fixed(1),
                         modifier = Modifier
                             .weight(1f)
-                            .padding(horizontal = 9.dp),
-                        contentPadding = PaddingValues(top = 16.dp, bottom = 9.dp),
-                        verticalArrangement = Arrangement.spacedBy(9.dp)
+                            .padding(9.dp),
+                        contentPadding = PaddingValues(top = 7.dp, bottom = 9.dp)
                     ) {
-                        items(configs) { cvm ->
-                            CVMRow(cvm, { editingConfig = cvm }) {
-                                if (currentTerminalVmName != cvm.name || terminalInstance == null) {
-                                    currentTerminalVmName = cvm.name
-                                    terminalInstance =
-                                        createTTYInstance(context, object : TTYSessionStub() {
-                                            override fun onSessionFinished(session: com.termux.terminal.TerminalSession) {
-                                                terminalInstance = null; showTerminal =
-                                                    false; currentTerminalVmName = null
-                                            }
-                                        }, object : TTYViewStub() {
-                                            override fun onSingleTapUp(event: MotionEvent) {
-                                                (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(
-                                                    terminalInstance?.view, 0
-                                                )
-                                            }
-                                        }).also {
-                                            scope.launch {
-                                                delay(100); cmd(su); delay(100)
-                                                val workingDir = "$alsPath/app/cvm/${cvm.name}"
-                                                cmd("cd $workingDir")
-                                                if (!cvm.isRunning) cmd(cvm.command)
-                                            }
+                        itemsIndexed(configs) { index, cvm ->
+                            ALSList(
+                                data = cvm.name,
+                                first = index == 0,
+                                last = index == configs.size - 1,
+                                onClick = { editingConfig = cvm },
+                                iconContent = {
+                                    ALSButton(R.drawable.power) {
+                                        if (currentTerminalVmName != cvm.name || terminalInstance == null) {
+                                            currentTerminalVmName = cvm.name
+                                            terminalInstance =
+                                                createTTYInstance(context, object : TTYSessionStub() {
+                                                    override fun onSessionFinished(session: com.termux.terminal.TerminalSession) {
+                                                        terminalInstance = null; showTerminal =
+                                                            false; currentTerminalVmName = null
+                                                    }
+                                                }, object : TTYViewStub() {
+                                                    override fun onSingleTapUp(event: MotionEvent) {
+                                                        (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(
+                                                            terminalInstance?.view, 0
+                                                        )
+                                                    }
+                                                }).also {
+                                                    scope.launch {
+                                                        delay(100); cmd(su); delay(100)
+                                                        val workingDir = "$alsPath/app/cvm/${cvm.name}"
+                                                        cmd("cd $workingDir")
+                                                        if (!cvm.isRunning) cmd(cvm.command)
+                                                    }
+                                                }
                                         }
+                                        showTerminal = true
+                                    }
                                 }
-                                showTerminal = true
-                            }
+                            )
                         }
                     }
                     Box(
@@ -172,26 +149,7 @@ fun CVM(onExit: () -> Unit) {
     }
 }
 
-@Composable
-fun CVMRow(cvm: CVMConfig, onEdit: () -> Unit, onTerm: () -> Unit) =
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(9.dp))
-            .background(Color(0xFF111111))
-            .clickable { onEdit() }
-            .padding(9.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            text = cvm.name,
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 4.dp),
-            color = Color.White,
-            fontSize = 12.sp,
-            fontFamily = localFont.current
-        )
-        ALSButton(R.drawable.power) { onTerm() }
-    }
+
 
 private fun parseConfigFile(file: File) = JSONObject().apply {
     runCatching {
