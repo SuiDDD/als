@@ -17,9 +17,9 @@ object TTYENV {
         "COLORTERM=truecolor",
         "DEX2OATBOOTCLASSPATH=${System.getenv("DEX2OATBOOTCLASSPATH")}",
         "EXTERNAL_STORAGE=${System.getenv("EXTERNAL_STORAGE")}",
-        "HOME=$alsPath",
+        "HOME=$alsDir",
         "LANG=en_US.UTF-8",
-        "PATH=/system/bin:/system/xbin:$alsPath",
+        "PATH=/system/bin:/system/xbin:$alsDir",
         "STANDALONE_SYSTEMSERVER_JARS=${System.getenv("STANDALONE_SYSTEMSERVER_JARS")}",
         "SYSTEMSERVERCLASSPATH=${System.getenv("SYSTEMSERVERCLASSPATH")}",
         "TERM=xterm-direct"
@@ -27,4 +27,4 @@ object TTYENV {
 }
 
 fun TerminalSession(env: TTYENV, rows: Int, client: TerminalSessionClient): TerminalSession =
-    TerminalSession("sh", alsPath, env.args, env.env, rows, client)
+    TerminalSession("sh", alsDir, env.args, env.env, rows, client)

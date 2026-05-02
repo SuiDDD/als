@@ -48,7 +48,7 @@ fun Chr(onTTYCreated: (TTYInstance) -> Unit, scope: CoroutineScope) {
                 delay(90)
                 ttySession = chrInstance!!.session
                 cmd(su)
-                cmd("cd $alsPath && txc")
+                cmd("cd $alsDir && txc")
                 cmd("pkg install x11-repo -y && pkg install pulseaudio termux-x11 -y && { termux-x11 :1 & } && $su -c ./chr ")
             }
         }
@@ -70,7 +70,7 @@ fun Chr(onTTYCreated: (TTYInstance) -> Unit, scope: CoroutineScope) {
                         onClick = { },
                         iconContent = {
                             Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                                ALSButton(R.drawable.edit) { ideOpen("$alsPath/chr.sh") }
+                                ALSButton(R.drawable.edit) { ideOpen("$alsDir/chr.sh") }
                                 ALSButton(R.drawable.power) { chrTerm() }
                             }
                         }

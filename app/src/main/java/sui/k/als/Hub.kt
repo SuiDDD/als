@@ -16,7 +16,7 @@ import kotlinx.coroutines.*
 import sui.k.als.tty.*
 import sui.k.als.ui.*
 
-const val alsPath = "/data/local/tmp/als"
+const val alsDir = "/data/local/tmp/als"
 
 @Composable
 fun Hub(modifier: Modifier = Modifier, onFin: () -> Unit) = Box(
@@ -49,7 +49,7 @@ fun Hub(modifier: Modifier = Modifier, onFin: () -> Unit) = Box(
                     ?.showSoftInput(this, 0)
                 }
             }
-        }).also { scope.launch { delay(90); cmd(su); delay(90); cmd("$alsPath/tty") } }
+        }).also { scope.launch { delay(90); cmd(su); delay(90); cmd("$alsDir/tty") } }
         sessions = sessions + instance; active = instance; showTTY = true; showTTYHUB = false
     }
     DisposableEffect(Unit) { onDispose(close) }

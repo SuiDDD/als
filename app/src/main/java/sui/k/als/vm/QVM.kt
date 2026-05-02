@@ -22,7 +22,7 @@ import sui.k.als.ui.*
 import sui.k.als.vm.qvm.*
 import java.io.*
 
-const val qvmPath = "$alsPath/app/qvm"
+const val qvmPath = "$alsDir/app/qvm"
 
 data class QVMConfig(
     val name: String, var isRunning: Boolean = false, val raw: JSONObject? = null
@@ -41,7 +41,7 @@ fun QVM(onExit: () -> Unit) {
     var showTerminal by remember { mutableStateOf(false) }
     var showQvmSplash by remember { mutableStateOf(false) }
     fun refresh() = mutableListOf<QVMConfig>().apply {
-        File("$alsPath/app/qvm").takeIf { it.exists() }?.listFiles { it.isDirectory }
+        File("$alsDir/app/qvm").takeIf { it.exists() }?.listFiles { it.isDirectory }
             ?.forEach { dir ->
                 File(dir, "${dir.name}.cfg").takeIf { it.exists() }?.let { file ->
                     runCatching {
@@ -136,7 +136,7 @@ fun QVM(onExit: () -> Unit) {
                                                         scope.launch {
                                                             delay(90)
                                                             cmd(su)
-                                                            cmd("VM_DIR=\"$alsPath/app/qvm/${qvm.name}\"")
+                                                            cmd("VM_DIR=\"$alsDir/app/qvm/${qvm.name}\"")
                                                             cmd(qvm.getCommand())
                                                         }
                                                     }

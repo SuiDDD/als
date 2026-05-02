@@ -26,7 +26,7 @@ fun QVMDisplay(state: MutableMap<String, Any>) {
             value = state["display_device"]?.toString() ?: "virtio-gpu-pci",
             first = true
         ) {
-            val qvmPath = "$alsPath/app/qvm"
+            val qvmPath = "$alsDir/app/qvm"
             val discoveryCommand =
                 """LD_LIBRARY_PATH=$qvmPath/libs $qvmPath/qemu-system-aarch64 -M virt -device help 2>&1 | sed -n '/Display devices:/,/^$/p' | sed '1d' | awk -F'[" ,]' '{print $3}'"""
             runCatching {

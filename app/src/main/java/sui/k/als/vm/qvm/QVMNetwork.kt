@@ -25,7 +25,7 @@ fun QVMNetwork(state: MutableMap<String, Any>) {
 
     Column {
         ALSList(stringResource(R.string.network_device), value = dev, first = true) {
-            val qvmPath = "$alsPath/app/qvm"
+            val qvmPath = "$alsDir/app/qvm"
             val discoveryCommand =
                 $$"LD_LIBRARY_PATH=$$qvmPath/libs $$qvmPath/qemu-system-aarch64 -M virt -device help 2>&1 | sed -n '/Network devices:/,/^$/p' | sed '1d' | awk -F'[\\\\\" ,]' '{print $3}'"
             try {
