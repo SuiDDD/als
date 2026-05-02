@@ -43,13 +43,11 @@ fun App() {
             TTYScreen(activeTTY!!) { TTYIME() }
         } else when {
             showQVM -> QVM { showQVM = false }
-            showCVM -> CVM { showCVM = false }
             showChr -> Chr(onTTYCreated = { activeTTY = it }, scope = scope)
             showSet -> Set { showSet = false }
             else -> Box(Modifier.fillMaxSize(), Alignment.Center) {
                 Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
                     ALSButton("Q", iconTint = Color(0xFFFD6500)) { showQVM = true }
-                    ALSButton("C", iconTint = Color(0xFF37AAC6)) { showCVM = true }
                     ALSButton("C") { showChr = true }
                     ALSButton(R.drawable.settings) { showSet = true }
                 }

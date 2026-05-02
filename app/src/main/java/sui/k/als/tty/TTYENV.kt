@@ -3,10 +3,7 @@ package sui.k.als.tty
 import com.termux.terminal.*
 import sui.k.als.*
 
-
 object TTYENV {
-    const val shell = "/system/bin/sh"
-    const val workDir = alsPath
     val args = arrayOf("-i")
     val env = arrayOf(
         "ANDROID_ART_ROOT=${System.getenv("ANDROID_ART_ROOT")}",
@@ -20,7 +17,7 @@ object TTYENV {
         "COLORTERM=truecolor",
         "DEX2OATBOOTCLASSPATH=${System.getenv("DEX2OATBOOTCLASSPATH")}",
         "EXTERNAL_STORAGE=${System.getenv("EXTERNAL_STORAGE")}",
-        "HOME=$workDir",
+        "HOME=$alsPath",
         "LANG=en_US.UTF-8",
         "PATH=/system/bin:/system/xbin:$alsPath",
         "STANDALONE_SYSTEMSERVER_JARS=${System.getenv("STANDALONE_SYSTEMSERVER_JARS")}",
@@ -29,5 +26,5 @@ object TTYENV {
     )
 }
 
-fun TerminalSession(env: TTYENV, rows: Int, client: TerminalSessionClient) =
-    TerminalSession(env.shell, env.workDir, env.args, env.env, rows, client)
+fun TerminalSession(env: TTYENV, rows: Int, client: TerminalSessionClient): TerminalSession =
+    TerminalSession("sh", alsPath, env.args, env.env, rows, client)

@@ -54,12 +54,14 @@ fun TTYScreen(instance: TTYInstance, content: @Composable () -> Unit = {}) {
                     .padding(
                         bottom = if (imeHeightPx == 0 || IMEState.isFloating) 0.dp else imePadding + with(
                             density
-                        ) { imeHeightPx.toDp() }), update = { it.onScreenUpdated() })
+                        ) { imeHeightPx.toDp() }), update = { view -> view.onScreenUpdated() })
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = imePadding)
-                    .onGloballyPositioned { imeHeightPx = it.size.height }) { content() }
+                    .onGloballyPositioned { layout ->
+                        imeHeightPx = layout.size.height
+                    }) { content() }
         }
     }
 }
@@ -72,7 +74,7 @@ fun createTTYInstance(
         setLayerType(View.LAYER_TYPE_HARDWARE, null)
         isFocusable = true
         isFocusableInTouchMode = true
-        setTextSize(18)
+        setTextSize(12)
         setTypeface(
             try {
                 Typeface.createFromAsset(context.assets, "font/GoogleSansCode.ttf")
@@ -147,7 +149,7 @@ open class TTYSessionStub : TerminalSessionClient {
 
 open class TTYViewStub : TerminalViewClient {
     private var boundView: TerminalView? = null
-    private var currentSize = 18f
+    private var currentSize = 12f
     fun bindView(view: TerminalView) {
         boundView = view
     }
@@ -164,10 +166,10 @@ open class TTYViewStub : TerminalViewClient {
     override fun onSingleTapUp(event: MotionEvent) {}
     override fun onLongPress(event: MotionEvent) = false
     override fun onScale(scaleFactor: Float): Float {
-        val newSize = (currentSize * scaleFactor).coerceIn(18f, 81f)
+        val newSize = (currentSize * scaleFactor).coerceIn(12f, 270f)
         if (newSize != currentSize) {
             currentSize = newSize
-            boundView?.let { v -> v.post { v.setTextSize(currentSize.toInt()) } }
+            boundView?.post { boundView?.setTextSize(currentSize.toInt()) }
         }
         return 1f
     }

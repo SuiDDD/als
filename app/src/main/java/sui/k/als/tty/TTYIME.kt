@@ -31,80 +31,52 @@ object IMEState {
 private val keyCodes =
     "Tab·\t¦Esc·\u001b¦Enter·\r¦Back·\u007f¦ · ¦↑·\u001b[A¦↓·\u001b[B¦←·\u001b[D¦→·\u001b[C¦Home·\u001b[1~¦End·\u001b[4~¦Del·\u001b[3~¦F1·\u001bOP¦F2·\u001bOQ¦F3·\u001bOR¦F4·\u001bOS¦F5·\u001b[15~¦F6·\u001b[17~¦F7·\u001b[18~¦F8·\u001b[19~¦F9·\u001b[20~¦F10·\u001b[21~¦F11·\u001b[23~¦F12·\u001b[24~".split(
         '¦'
-    ).associate { it.split('·').let { p -> p[0] to p[1] } }
+    ).associate { entry -> entry.split('·').let { parts -> parts[0] to parts[1] } }
 private val symbolMap =
     "`~·1!·2@·3#·4$·5%·6^·7&·8*·9(·0)·-_·=+·[{·]}·\\|·;:·'\"·,<·.>·/?".split('·')
-        .associate { it[0].toString() to it[1].toString() }
+        .associate { pair -> pair[0].toString() to pair[1].toString() }
 
 @Composable
 fun TTYIME() {
-    val density = LocalDensity.current
-    val config = LocalConfiguration.current
-    val windowSize = LocalWindowInfo.current.containerSize
-    val panelHeight =
-        with(density) { (if (config.orientation == 2) windowSize.height / 2 else windowSize.height / 3).toDp() }
-    BackHandler(IMEState.isFullKeyboardVisible) {
-        IMEState.isFloating = false; IMEState.isFullKeyboardVisible = false
+    val rowHeight = 18.dp
+    val isFull = IMEState.isFullKeyboardVisible
+    val rows = if (!isFull) listOf(
+        listOf("Esc", "F1", "F2", "F3", "·", "F4", "F5", "F6", "Del"),
+        listOf("Shift", "F7", "F8", "F9", "↑", "F10", "F11", "F12", "Back"),
+        listOf("Tab", "Ctrl", "Alt", "←", "↓", "→", "Home", "End", "Enter")
+    ) else "Esc·F1·F2·F3·F4·F5·F6··F7·F8·F9·F10·F11·F12·Del¦`·1·2·3·4·5·6·7·8·9·0·-·=·Back¦Tab·Q·W·E·R·T·Y·U·I·O·P·[·]·\\¦Caps·A·S·D·F·G·H·J·K·L·;·'·Enter¦Shift·Z·X·C·V·B·N·M·,·.·↑·/¦Ctrl·Alt·Home· ·End·←·↓·→".split(
+        '¦'
+    ).map { rowStr -> rowStr.split('·') }
+    val totalHeight = rowHeight * rows.size; BackHandler(isFull || IMEState.isFloating) {
+        IMEState.isFloating = false; IMEState.isFullKeyboardVisible =
+        false; IMEState.keyboardOffset = IntOffset.Zero
     }
-    Box(
-        modifier = if (IMEState.isFloating) Modifier
-            .offset { IMEState.keyboardOffset }
-            .size(360.dp, panelHeight) else Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()) {
+    Box(modifier = if (IMEState.isFloating) Modifier
+        .offset { IMEState.keyboardOffset }
+        .size(360.dp, totalHeight) else Modifier
+        .fillMaxWidth()
+        .wrapContentHeight()) {
         Column(
             Modifier
                 .fillMaxWidth()
                 .background(Color.Black.copy(0.7f))
+                .height(totalHeight)
         ) {
-            if (!IMEState.isFullKeyboardVisible) {
-                Column(
+            rows.forEach { row ->
+                Row(
                     Modifier
                         .fillMaxWidth()
-                        .height(90.dp)
+                        .weight(1f)
                 ) {
-                    listOf(
-                        listOf("Esc", "F1", "F2", "F3", "·", "F4", "F5", "F6", "Del"),
-                        listOf("Shift", "F7", "F8", "F9", "↑", "F10", "F11", "F12", "Back"),
-                        listOf("Tab", "Ctrl", "Alt", "←", "↓", "→", "Home", "End", "Enter")
-                    ).forEach { row ->
-                        Row(
-                            Modifier
-                                .fillMaxWidth()
-                                .weight(1f)
-                        ) {
-                            row.forEach {
-                                KeyBase(
-                                    it, 1f, it in listOf("Ctrl", "Alt", "Shift"), it == "·"
-                                )
-                            }
-                        }
-                    }
-                }
-            } else {
-                val layout =
-                    "Esc·F1·F2·F3·F4·F5·F6··F7·F8·F9·F10·F11·F12·Del¦`·1·2·3·4·5·6·7·8·9·0·-·=·Back¦Tab·Q·W·E·R·T·Y·U·I·O·P·[·]·\\¦Caps·A·S·D·F·G·H·J·K·L·;·'·Enter¦Shift·Z·X·C·V·B·N·M·,·.·↑·/¦Ctrl·Alt·Home· ·End·←·↓·→".split(
-                        '¦'
-                    ).map { it.split('·') }
-                Column(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(panelHeight)
-                ) {
-                    layout.forEach { row ->
-                        Row(
-                            Modifier
-                                .fillMaxWidth()
-                                .weight(1f)
-                        ) {
-                            row.forEach { label ->
-                                KeyBase(
-                                    label, when (label) {
-                                        " " -> 3.9f; "Ctrl", "Alt", "Home", "End" -> 1.2f; else -> 1f
-                                    }, label in listOf("Ctrl", "Shift", "Alt", "Caps"), label == ""
-                                )
-                            }
-                        }
+                    row.forEach { label ->
+                        KeyBase(
+                            label,
+                            if (isFull) when (label) {
+                                " " -> 3.9f; "Ctrl", "Alt", "Home", "End" -> 1.2f; else -> 1f
+                            } else 1f,
+                            label in listOf("Ctrl", "Shift", "Alt", "Caps"),
+                            if (isFull) label == "" else label == "·"
+                        )
                     }
                 }
             }
@@ -114,109 +86,106 @@ fun TTYIME() {
 
 @Composable
 private fun RowScope.KeyBase(
-    label: String, weight: Float, isMod: Boolean = false, isCtrl: Boolean = false
+    label: String, weight: Float, isModifier: Boolean = false, isControlKey: Boolean = false
 ) {
     var isPressed by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val view = LocalView.current
-    val isActive = when (label) {
+    val currentView = LocalView.current
+    val isModifierActive = when (label) {
         "Ctrl" -> IMEState.isCtrlActive; "Shift" -> IMEState.isShiftActive; "Alt" -> IMEState.isAltActive; "Caps" -> IMEState.isCapsActive; else -> false
     }
-    val disp = when {
-        isCtrl -> ""; isMod || label.length > 1 || (!label[0].isLetter() && !symbolMap.containsKey(
+    val displayText = when {
+        isControlKey -> ""; isModifier || label.length > 1 || (!label[0].isLetter() && !symbolMap.containsKey(
             label
         )) -> label; IMEState.isShiftActive -> symbolMap[label]
             ?: label.uppercase(); IMEState.isCapsActive && label[0].isLetter() -> label.uppercase(); else -> label
     }
-    Box(
-        modifier = Modifier
-            .weight(weight)
-            .fillMaxHeight()
-            .pointerInput(label) {
-                if (isCtrl) detectDragGestures(
-                    onDragStart = {
-                        isPressed = true; if (IMEState.isFullKeyboardVisible) {
-                        IMEState.isFloating = true; view.performHapticFeedback(
-                            HapticFeedbackConstants.LONG_PRESS
-                        )
-                    }
-                    },
-                    onDragEnd = { isPressed = false },
-                    onDragCancel = { isPressed = false }) { change, drag ->
-                    if (IMEState.isFloating) {
-                        change.consume(); IMEState.keyboardOffset += IntOffset(
-                            drag.x.roundToInt(), drag.y.roundToInt()
-                        )
-                    }
+    Box(modifier = Modifier
+        .weight(weight)
+        .fillMaxHeight()
+        .pointerInput(label) {
+            if (isControlKey) detectDragGestures(
+                onDragStart = {
+                isPressed = true; IMEState.isFloating = true; currentView.performHapticFeedback(
+                HapticFeedbackConstants.LONG_PRESS
+            )
+            },
+                onDragEnd = { isPressed = false },
+                onDragCancel = { isPressed = false }) { change, dragAmount ->
+                if (IMEState.isFloating) {
+                    change.consume(); IMEState.keyboardOffset += IntOffset(
+                        dragAmount.x.roundToInt(), dragAmount.y.roundToInt()
+                    )
                 }
             }
-            .pointerInput(label) {
-                detectTapGestures(onPress = {
-                    isPressed =
-                        true; view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                    if (isCtrl) {
-                        try {
-                            awaitRelease(); IMEState.isFullKeyboardVisible =
-                                !IMEState.isFullKeyboardVisible.also {
-                                    if (!it) {
-                                        IMEState.isFloating = false; IMEState.keyboardOffset =
-                                            IntOffset.Zero
-                                    }
-                                }
-                        } finally {
-                            isPressed = false
-                        }
-                    } else if (isMod) {
-                        val setter: (Boolean) -> Unit = { v ->
-                            when (label) {
-                                "Ctrl" -> IMEState.isCtrlActive =
-                                    v; "Shift" -> IMEState.isShiftActive =
-                                v; "Alt" -> IMEState.isAltActive =
-                                v; "Caps" -> IMEState.isCapsActive =
-                                v
-                            }
-                        }
-                        setter(true)
-                        try {
-                            awaitRelease()
-                        } finally {
-                            setter(false); isPressed = false
-                        }
-                    } else {
-                        val job = scope.launch {
-                            processKey(label); delay(270); while (true) {
-                            processKey(label); delay(30)
-                        }
-                        }
-                        try {
-                            awaitRelease()
-                        } finally {
-                            job.cancel(); isPressed = false
+        }
+        .pointerInput(label) {
+            detectTapGestures(onPress = {
+                isPressed =
+                    true; currentView.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP); if (!isControlKey) {
+                if (isModifier) {
+                    val updateModifier: (Boolean) -> Unit = { active ->
+                        when (label) {
+                            "Ctrl" -> IMEState.isCtrlActive =
+                                active; "Shift" -> IMEState.isShiftActive =
+                            active; "Alt" -> IMEState.isAltActive =
+                            active; "Caps" -> IMEState.isCapsActive = active
                         }
                     }
-                })
+                    updateModifier(true); try {
+                        awaitRelease()
+                    } finally {
+                        updateModifier(false); isPressed = false
+                    }
+                } else {
+                    val repeatJob = scope.launch {
+                        processKey(label); delay(270); while (true) {
+                        processKey(label); delay(30)
+                    }
+                    }
+                    try {
+                        awaitRelease()
+                    } finally {
+                        repeatJob.cancel(); isPressed = false
+                    }
+                }
+            } else {
+                try {
+                    awaitRelease()
+                } finally {
+                    isPressed = false
+                }
             }
-            .background(Color.Transparent), contentAlignment = Alignment.Center) {
+            }, onTap = {
+                if (isControlKey) {
+                    if (IMEState.isFloating) {
+                        IMEState.isFloating = false; IMEState.keyboardOffset = IntOffset.Zero
+                    } else {
+                        IMEState.isFullKeyboardVisible = !IMEState.isFullKeyboardVisible
+                    }
+                }
+            })
+        }
+        .background(Color.Transparent), contentAlignment = Alignment.Center) {
         Text(
-            disp,
-            color = if (isPressed || isActive) Color.Gray else Color.White,
-            fontSize = 12.sp,
+            displayText,
+            color = if (isPressed || isModifierActive) Color.Gray else Color.White,
+            fontSize = 9.sp,
             softWrap = false
         )
     }
 }
 
 private fun processKey(label: String) {
-    keyCodes[label]?.let { sendToTTY(if (IMEState.isAltActive && label != "Alt") "\u001b$it" else it) }
+    keyCodes[label]?.let { code -> sendToTTY(if (IMEState.isAltActive && label != "Alt") "\u001b$code" else code) }
         ?: run {
-            val upper =
+            val isUpperCase =
                 IMEState.isShiftActive || (IMEState.isCapsActive && label.length == 1 && label[0].isLetter())
-            var text = if (IMEState.isShiftActive) (symbolMap[label]
-                ?: label.uppercase()) else if (upper) label.uppercase() else label.lowercase()
-            if (IMEState.isCtrlActive && text.length == 1) text.uppercase()[0].let {
-                if (it in '@'..'_') text = (it.code - '@'.code).toChar().toString()
-            }
-            sendToTTY(if (IMEState.isAltActive) "\u001b$text" else text)
+            var charText = if (IMEState.isShiftActive) (symbolMap[label]
+                ?: label.uppercase()) else if (isUpperCase) label.uppercase() else label.lowercase(); if (IMEState.isCtrlActive && charText.length == 1) charText.uppercase()[0].let { char ->
+            if (char in '@'..'_') charText = (char.code - '@'.code).toChar().toString()
+        }
+            sendToTTY(if (IMEState.isAltActive) "\u001b$charText" else charText)
         }
 }
 
