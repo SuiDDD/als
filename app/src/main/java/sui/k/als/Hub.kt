@@ -49,7 +49,7 @@ fun Hub(modifier: Modifier = Modifier, onFin: () -> Unit) = Box(
                     ?.showSoftInput(this, 0)
                 }
             }
-        }).also { scope.launch { delay(90); cmd(su); delay(90); cmd("$alsDir/tty") } }
+        }).also { scope.launch { delay(90); cmd(su); delay(90); cmd("$alsDir/app/ate $alsDir/app/chr/ate") } }
         sessions = sessions + instance; active = instance; showTTY = true; showTTYHUB = false
     }
     DisposableEffect(Unit) { onDispose(close) }
