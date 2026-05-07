@@ -22,7 +22,7 @@ import sui.k.als.ui.*
 import sui.k.als.vm.qvm.*
 import java.io.*
 
-const val qvmPath = "$alsDir/app/qvm"
+const val qvmDir = "$alsDir/app/qvm"
 
 data class QVMConfig(
     val name: String, var isRunning: Boolean = false, val raw: JSONObject? = null

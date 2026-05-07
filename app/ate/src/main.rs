@@ -4,20 +4,17 @@ mod on;
 mod termux;
 mod desktop;
 use std::{env, path::PathBuf};
-
 fn main() {
-    let arguments: Vec<String> = env::args().collect();
-    if let Some(te_dir) = arguments.get(1) {
-        if te_dir != "termux" {
-            let target_root = PathBuf::from(te_dir);
-            if mount::te_mt(&target_root).is_ok() {
-                on::te_on(&target_root);
-                let _ = umount::te_umt(&target_root);
-            } else {
-                std::process::exit(1);
-            }
-            return;
+    let args: Vec<String> = env::args().collect();
+    if let Some(ate_dir) = args.get(1).filter(|&dir| dir != "termux") {
+        if mount::te_mt(ate_dir).is_ok() {
+            let path = PathBuf::from(ate_dir);
+            on::te_on(&path);
+            let _ = umount::te_umt(&path);
+        } else {
+            std::process::exit(1);
         }
+    } else {
+        while desktop::execute_desktop() {}
     }
-    while desktop::execute_desktop() {}
 }

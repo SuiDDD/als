@@ -15,8 +15,8 @@ object QVMPreview {
             { k: String -> if (data is JSONObject) data.opt(k) else (data as? Map<*, *>)?.get(k) }
         val isTrue = { k: String -> val v = get(k); v == true || v == "true" || v == 1 || v == "1" }
         return buildString {
-            append("LD_LIBRARY_PATH=$qvmPath/libs ")
-            append("$qvmPath/qemu-system-aarch64 ")
+            append("LD_LIBRARY_PATH=$qvmDir/libs ")
+            append("$qvmDir/qemu-system-aarch64 ")
             append("-M virt,confidential-guest-support=prot0 ")
             append("-accel gunyah ")
             append("-cpu host ")
@@ -31,8 +31,8 @@ object QVMPreview {
                 if (isTrue("force")) append("-mem-prealloc ")
                 if (isTrue("lock")) append("-overcommit mem-lock=on ")
             }
-            append("-bios $qvmPath/QEMU_EFI.fd ")
-            append("-L $qvmPath/pc-bios ")
+            append("-bios $qvmDir/QEMU_EFI.fd ")
+            append("-L $qvmDir/pc-bios ")
             val getList = { k: String ->
                 when (val v = get(k)) {
                     is JSONArray -> List(v.length()) { v.get(it) }
