@@ -1,4 +1,4 @@
-package sui.k.als.vm
+package sui.k.als.vm.qvm
 
 import android.content.*
 import android.view.*
@@ -13,13 +13,13 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.unit.*
 import androidx.core.net.*
+import com.termux.terminal.*
 import kotlinx.coroutines.*
 import org.json.*
 import sui.k.als.*
 import sui.k.als.R
 import sui.k.als.tty.*
 import sui.k.als.ui.*
-import sui.k.als.vm.qvm.*
 import java.io.*
 
 const val qvmDir = "$alsDir/app/qvm"
@@ -120,7 +120,7 @@ fun QVM(onExit: () -> Unit) {
                                                     createTTYInstance(
                                                         context,
                                                         object : TTYSessionStub() {
-                                                            override fun onSessionFinished(session: com.termux.terminal.TerminalSession) {
+                                                            override fun onSessionFinished(session: TerminalSession) {
                                                                 terminalInstance =
                                                                     null; showTerminal = false
                                                             }

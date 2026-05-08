@@ -9,11 +9,11 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.unit.*
 import sui.k.als.chr.qcom.*
+import sui.k.als.dss.DSS
 import sui.k.als.set.*
 import sui.k.als.tty.*
 import sui.k.als.ui.*
-import sui.k.als.vm.dss.*
-import sui.k.als.vm.*
+import sui.k.als.vm.qvm.QVM
 
 @Composable
 fun App() {

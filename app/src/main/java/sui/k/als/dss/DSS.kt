@@ -1,4 +1,4 @@
-package sui.k.als.vm.dss
+package sui.k.als.dss
 import android.content.*
 import android.view.*
 import android.view.inputmethod.*
@@ -11,7 +11,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.platform.*
+import androidx.compose.ui.res.*
 import androidx.compose.ui.unit.*
+import com.termux.terminal.*
 import kotlinx.coroutines.*
 import org.json.*
 import sui.k.als.*
@@ -20,10 +22,9 @@ import sui.k.als.tty.*
 import sui.k.als.ui.*
 import sui.k.als.vm.*
 import java.io.*
+
 const val dssDir = "$alsDir/app/dss"
-data class DSSConfig(
-    val name: String, var isRunning: Boolean = false, val raw: JSONObject? = null
-) {
+data class DSSConfig(val name: String, var isRunning: Boolean = false, val raw: JSONObject? = null) {
     fun buildCommand(command: String, arguments: String = ""): String = buildString {
         append("$dssDir/droidspaces ")
         raw?.let { json ->
@@ -46,9 +47,6 @@ data class DSSConfig(
             if (json.optBoolean("block-nested-namespaces")) append("--block-nested-namespaces ")
             json.optString("privileged").takeIf { it.isNotEmpty() }?.let { append("--privileged=$it ") }
             if (json.optBoolean("foreground")) append("-f ")
-            if (command == "run") {
-                json.optString("user").takeIf { it.isNotEmpty() }?.let { append("-u \"$it\" ") }
-            }
             json.optString("env").takeIf { it.isNotEmpty() }?.let { append("-E \"$it\" ") }
             json.optJSONArray("binds")?.let { array ->
                 for (index in 0 until array.length()) append("-B \"${array.getString(index)}\" ")
@@ -81,12 +79,10 @@ fun DSS(onExit: () -> Unit) {
         }
         configs = list
     }
-    LaunchedEffect(Unit) {
-        while (true) { refresh(); delay(5000) }
-    }
+    LaunchedEffect(Unit) { while (true) { refresh(); delay(5000) } }
     fun openTerminal(command: String) {
         terminalInstance = createTTYInstance(context, object : TTYSessionStub() {
-            override fun onSessionFinished(session: com.termux.terminal.TerminalSession) {
+            override fun onSessionFinished(session: TerminalSession) {
                 terminalInstance = null; showTerminal = false
             }
         }, object : TTYViewStub() {
@@ -124,27 +120,23 @@ fun DSS(onExit: () -> Unit) {
                                 onClick = { editing = config },
                                 iconContent = {
                                     Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                                        ALSButton(if (config.isRunning) R.drawable.power else R.drawable.arrow_forward) {
+                                        ALSButton(if (config.isRunning) R.drawable.power else R.drawable.arrow_forward, click = {
                                             openTerminal(if (config.isRunning) config.buildCommand("stop") else config.buildCommand("start"))
-                                        }
-                                        ALSButton(R.drawable.delete) {
+                                        })
+                                        ALSButton(R.drawable.delete, click = {
                                             scope.launch(Dispatchers.IO) {
                                                 Runtime.getRuntime().exec(arrayOf(su, "-c", "rm $dssDir/${config.name}.json")).waitFor()
                                                 refresh()
                                             }
-                                        }
+                                        })
                                     }
                                 }
                             )
                         }
                     }
-                    Row(
-                        Modifier.fillMaxWidth().padding(9.dp),
-                        horizontalArrangement = Arrangement.spacedBy(9.dp, Alignment.CenterHorizontally),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        ALSButton(R.drawable.add) { isCreating = true }
-                        ALSButton(R.drawable.info) { openTerminal("$dssDir/droidspaces check; $dssDir/droidspaces scan; $dssDir/droidspaces show") }
+                    Row(Modifier.fillMaxWidth().padding(9.dp), horizontalArrangement = Arrangement.spacedBy(9.dp, Alignment.CenterHorizontally)) {
+                        ALSButton(R.drawable.add, click = { isCreating = true })
+                        ALSButton(R.drawable.info, click = { openTerminal("$dssDir/droidspaces check; $dssDir/droidspaces scan; $dssDir/droidspaces show") })
                     }
                 }
             }
@@ -153,10 +145,11 @@ fun DSS(onExit: () -> Unit) {
 }
 @Composable
 fun DSSCreate(config: DSSConfig? = null, onBack: () -> Unit) {
+    val defaultName = stringResource(R.string.default_container_name)
     val state = remember {
         mutableStateMapOf<String, Any>().apply {
             config?.raw?.let { raw -> raw.keys().forEach { key -> put(key, raw.get(key)) } }
-            if (get("name") == null) put("name", "Ubuntu")
+            if (get("name") == null) put("name", defaultName)
         }
     }
     val binds = remember {
@@ -170,14 +163,12 @@ fun DSSCreate(config: DSSConfig? = null, onBack: () -> Unit) {
         icons = icons,
         activeIndex = activeIndex.intValue,
         onIndexChange = { activeIndex.intValue = it },
-        onLongClick = {},
         onAction = {
             val name = state["name"].toString()
             val json = JSONObject(state.toMap()).apply { put("binds", JSONArray(binds)) }
             runCatching {
                 Runtime.getRuntime().exec(arrayOf(su, "-c", "mkdir -p $dssDir")).waitFor()
-                val tempFile = File.createTempFile("dss_tmp", null)
-                tempFile.writeText(json.toString())
+                val tempFile = File.createTempFile("dss_tmp", null).apply { writeText(json.toString()) }
                 val targetPath = "$dssDir/$name.json"
                 Runtime.getRuntime().exec(arrayOf(su, "-c", "cp ${tempFile.absolutePath} $targetPath && chmod 644 $targetPath")).waitFor()
                 tempFile.delete()
@@ -185,47 +176,38 @@ fun DSSCreate(config: DSSConfig? = null, onBack: () -> Unit) {
             onBack()
         }
     ) { index ->
-        val toggleText = { key: String -> if (state[key] == true) "开" else "关" }
+        val onText = stringResource(R.string.on)
+        val offText = stringResource(R.string.off)
+        val toggle = { key: String -> if (state[key] == true) onText else offText }
         when (index) {
-            0 -> Column {
-                ALSList("容器名称", value = state["name"]?.toString() ?: "", onValueChange = { state["name"] = it }, first = true, last = true)
-            }
+            0 -> ALSList(stringResource(R.string.container_name), value = state["name"]?.toString() ?: "", onValueChange = { state["name"] = it }, first = true, last = true)
             1 -> Column {
-                ALSList("网络模式", value = state["net"]?.toString() ?: "host", onValueChange = { state["net"] = it }, first = true)
-                ALSList("禁用IPv6", value = toggleText("disable-ipv6"), onClick = { state["disable-ipv6"] = !(state["disable-ipv6"] as? Boolean ?: false) })
-                ALSList("DNS", value = state["dns"]?.toString() ?: "", onValueChange = { state["dns"] = it })
-                ALSList("静态IP", value = state["nat-ip"]?.toString() ?: "", onValueChange = { state["nat-ip"] = it })
-                ALSList("上游接口", value = state["upstream"]?.toString() ?: "", onValueChange = { state["upstream"] = it })
-                ALSList("端口转发", value = state["port"]?.toString() ?: "", onValueChange = { state["port"] = it }, last = true)
+                ALSList(stringResource(R.string.network_mode), value = state["net"]?.toString() ?: "host", onValueChange = { state["net"] = it }, first = true)
+                ALSList(stringResource(R.string.disable_ipv6), value = toggle("disable-ipv6"), onClick = { state["disable-ipv6"] = !(state["disable-ipv6"] as? Boolean ?: false) })
+                ALSList(stringResource(R.string.dns_server), value = state["dns"]?.toString() ?: "", onValueChange = { state["dns"] = it })
+                ALSList(stringResource(R.string.static_ip), value = state["nat-ip"]?.toString() ?: "", onValueChange = { state["nat-ip"] = it })
+                ALSList(stringResource(R.string.upstream_interface), value = state["upstream"]?.toString() ?: "", onValueChange = { state["upstream"] = it })
+                ALSList(stringResource(R.string.port_forwarding), value = state["port"]?.toString() ?: "", onValueChange = { state["port"] = it }, last = true)
             }
             2 -> Column {
-                ALSList("RootFS 目录", value = state["rootfs"]?.toString() ?: "", onValueChange = { state["rootfs"] = it; state["rootfs-img"] = "" }, first = true)
-                ALSList("RootFS 镜像", value = state["rootfs-img"]?.toString() ?: "", onValueChange = { state["rootfs-img"] = it; state["rootfs"] = "" })
-                ALSList("易失模式", value = toggleText("volatile"), onClick = { state["volatile"] = !(state["volatile"] as? Boolean ?: false) })
+                ALSList(stringResource(R.string.rootfs_directory), value = state["rootfs"]?.toString() ?: "", onValueChange = { state["rootfs"] = it; state["rootfs-img"] = "" }, first = true)
+                ALSList(stringResource(R.string.rootfs_image), value = state["rootfs-img"]?.toString() ?: "", onValueChange = { state["rootfs-img"] = it; state["rootfs"] = "" })
+                ALSList(stringResource(R.string.volatile_mode), value = toggle("volatile"), onClick = { state["volatile"] = !(state["volatile"] as? Boolean ?: false) })
                 Spacer(Modifier.height(9.dp))
-                binds.forEachIndexed { index, bind ->
-                    ALSList("挂载点 $index", value = bind, onValueChange = { binds[index] = it }, last = index == binds.size - 1)
-                }
-                Box(Modifier.fillMaxWidth().padding(9.dp), Alignment.Center) {
-                    ALSButton(R.drawable.add) { binds.add("") }
-                }
+                binds.forEachIndexed { i, b -> ALSList(stringResource(R.string.mount_point, i + 1), value = b, onValueChange = { binds[i] = it }, last = i == binds.size - 1) }
+                Box(Modifier.fillMaxWidth().padding(9.dp), Alignment.Center) { ALSButton(R.drawable.add, click = { binds.add("") }) }
             }
             3 -> Column {
-                ALSList("安卓存储", value = toggleText("enable-android-storage"), onClick = { state["enable-android-storage"] = !(state["enable-android-storage"] as? Boolean ?: false) }, first = true)
-                ALSList("硬件访问", value = toggleText("hw-access"), onClick = { state["hw-access"] = !(state["hw-access"] as? Boolean ?: false) })
-                ALSList("GPU加速", value = toggleText("gpu"), onClick = { state["gpu"] = !(state["gpu"] as? Boolean ?: false) })
-                ALSList("Termux-X11", value = toggleText("termux-x11"), onClick = { state["termux-x11"] = !(state["termux-x11"] as? Boolean ?: false) })
-                ALSList("SELinux", value = if (state["selinux-permissive"] == true) "宽容" else "强制", onClick = { state["selinux-permissive"] = !(state["selinux-permissive"] as? Boolean ?: false) })
-                ALSList("强制CgroupV1", value = toggleText("force-cgroupv1"), onClick = { state["force-cgroupv1"] = !(state["force-cgroupv1"] as? Boolean ?: false) })
-                ALSList("特权模式", value = state["privileged"]?.toString() ?: "", onValueChange = { state["privileged"] = it }, last = true)
+                ALSList(stringResource(R.string.selinux), value = if (state["selinux-permissive"] == true) stringResource(R.string.permissive) else stringResource(R.string.enforcing), onClick = { state["selinux-permissive"] = !(state["selinux-permissive"] as? Boolean ?: false) }, first = true)
+                ALSList(stringResource(R.string.android_storage), value = toggle("enable-android-storage"), onClick = { state["enable-android-storage"] = !(state["enable-android-storage"] as? Boolean ?: false) })
+                ALSList(stringResource(R.string.hardware_access), value = toggle("hw-access"), onClick = { state["hw-access"] = !(state["hw-access"] as? Boolean ?: false) })
+                ALSList(stringResource(R.string.privileged_mode), value = state["privileged"]?.toString() ?: "", onValueChange = { state["privileged"] = it })
+                ALSList(stringResource(R.string.gpu_acceleration), value = toggle("gpu"), onClick = { state["gpu"] = !(state["gpu"] as? Boolean ?: false) })
+                ALSList(stringResource(R.string.termux_x11), value = toggle("termux-x11"), onClick = { state["termux-x11"] = !(state["termux-x11"] as? Boolean ?: false) })
+                ALSList(stringResource(R.string.force_cgroupv1), value = toggle("force-cgroupv1"), onClick = { state["force-cgroupv1"] = !(state["force-cgroupv1"] as? Boolean ?: false) }, last = true)
             }
-            4 -> {
-                val command = remember(state.toMap(), binds.toList()) {
-                    DSSConfig(state["name"].toString(), false, JSONObject(state.toMap()).apply { put("binds", JSONArray(binds)) }).buildCommand("start")
-                }
-                SelectionContainer {
-                    Text(command, color = Color.Gray, fontSize = 9.sp, fontFamily = localFont.current)
-                }
+            4 -> SelectionContainer {
+                Text(DSSConfig(state["name"].toString(), false, JSONObject(state.toMap()).apply { put("binds", JSONArray(binds)) }).buildCommand("start"), color = Color.Gray, fontSize = 9.sp, fontFamily = localFont.current)
             }
         }
     }

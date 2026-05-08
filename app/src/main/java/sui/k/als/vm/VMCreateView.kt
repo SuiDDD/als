@@ -16,7 +16,7 @@ fun ExpressiveCanvas(
     icons: List<Int>,
     activeIndex: Int,
     onIndexChange: (Int) -> Unit,
-    onLongClick: (Int) -> Unit,
+    onLongClick: (Int) -> Unit = {},
     onAction: () -> Unit,
     content: @Composable (Int) -> Unit
 ) {
