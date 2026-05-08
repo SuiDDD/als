@@ -176,14 +176,11 @@ fun DSSCreate(config: DSSConfig? = null, onBack: () -> Unit) {
             onBack()
         }
     ) { index ->
-        val onText = stringResource(R.string.on)
-        val offText = stringResource(R.string.off)
-        val toggle = { key: String -> if (state[key] == true) onText else offText }
         when (index) {
             0 -> ALSList(stringResource(R.string.container_name), value = state["name"]?.toString() ?: "", onValueChange = { state["name"] = it }, first = true, last = true)
             1 -> Column {
                 ALSList(stringResource(R.string.network_mode), value = state["net"]?.toString() ?: "host", onValueChange = { state["net"] = it }, first = true)
-                ALSList(stringResource(R.string.disable_ipv6), value = toggle("disable-ipv6"), onClick = { state["disable-ipv6"] = !(state["disable-ipv6"] as? Boolean ?: false) })
+                ALSList(stringResource(R.string.disable_ipv6), checked = state["disable-ipv6"] == true, onClick = { state["disable-ipv6"] = !(state["disable-ipv6"] as? Boolean ?: false) })
                 ALSList(stringResource(R.string.dns_server), value = state["dns"]?.toString() ?: "", onValueChange = { state["dns"] = it })
                 ALSList(stringResource(R.string.static_ip), value = state["nat-ip"]?.toString() ?: "", onValueChange = { state["nat-ip"] = it })
                 ALSList(stringResource(R.string.upstream_interface), value = state["upstream"]?.toString() ?: "", onValueChange = { state["upstream"] = it })
@@ -192,19 +189,19 @@ fun DSSCreate(config: DSSConfig? = null, onBack: () -> Unit) {
             2 -> Column {
                 ALSList(stringResource(R.string.rootfs_directory), value = state["rootfs"]?.toString() ?: "", onValueChange = { state["rootfs"] = it; state["rootfs-img"] = "" }, first = true)
                 ALSList(stringResource(R.string.rootfs_image), value = state["rootfs-img"]?.toString() ?: "", onValueChange = { state["rootfs-img"] = it; state["rootfs"] = "" })
-                ALSList(stringResource(R.string.volatile_mode), value = toggle("volatile"), onClick = { state["volatile"] = !(state["volatile"] as? Boolean ?: false) })
+                ALSList(stringResource(R.string.volatile_mode), checked = state["volatile"] == true, onClick = { state["volatile"] = !(state["volatile"] as? Boolean ?: false) })
                 Spacer(Modifier.height(9.dp))
                 binds.forEachIndexed { i, b -> ALSList(stringResource(R.string.mount_point, i + 1), value = b, onValueChange = { binds[i] = it }, last = i == binds.size - 1) }
                 Box(Modifier.fillMaxWidth().padding(9.dp), Alignment.Center) { ALSButton(R.drawable.add, click = { binds.add("") }) }
             }
             3 -> Column {
-                ALSList(stringResource(R.string.selinux), value = if (state["selinux-permissive"] == true) stringResource(R.string.permissive) else stringResource(R.string.enforcing), onClick = { state["selinux-permissive"] = !(state["selinux-permissive"] as? Boolean ?: false) }, first = true)
-                ALSList(stringResource(R.string.android_storage), value = toggle("enable-android-storage"), onClick = { state["enable-android-storage"] = !(state["enable-android-storage"] as? Boolean ?: false) })
-                ALSList(stringResource(R.string.hardware_access), value = toggle("hw-access"), onClick = { state["hw-access"] = !(state["hw-access"] as? Boolean ?: false) })
+                ALSList(stringResource(R.string.selinux), checked = state["selinux-permissive"] == true, onClick = { state["selinux-permissive"] = !(state["selinux-permissive"] as? Boolean ?: false) }, first = true)
+                ALSList(stringResource(R.string.android_storage), checked = state["enable-android-storage"] == true, onClick = { state["enable-android-storage"] = !(state["enable-android-storage"] as? Boolean ?: false) })
+                ALSList(stringResource(R.string.hardware_access), checked = state["hw-access"] == true, onClick = { state["hw-access"] = !(state["hw-access"] as? Boolean ?: false) })
                 ALSList(stringResource(R.string.privileged_mode), value = state["privileged"]?.toString() ?: "", onValueChange = { state["privileged"] = it })
-                ALSList(stringResource(R.string.gpu_acceleration), value = toggle("gpu"), onClick = { state["gpu"] = !(state["gpu"] as? Boolean ?: false) })
-                ALSList(stringResource(R.string.termux_x11), value = toggle("termux-x11"), onClick = { state["termux-x11"] = !(state["termux-x11"] as? Boolean ?: false) })
-                ALSList(stringResource(R.string.force_cgroupv1), value = toggle("force-cgroupv1"), onClick = { state["force-cgroupv1"] = !(state["force-cgroupv1"] as? Boolean ?: false) }, last = true)
+                ALSList(stringResource(R.string.gpu_acceleration), checked = state["gpu"] == true, onClick = { state["gpu"] = !(state["gpu"] as? Boolean ?: false) })
+                ALSList(stringResource(R.string.termux_x11), checked = state["termux-x11"] == true, onClick = { state["termux-x11"] = !(state["termux-x11"] as? Boolean ?: false) })
+                ALSList(stringResource(R.string.force_cgroupv1), checked = state["force-cgroupv1"] == true, onClick = { state["force-cgroupv1"] = !(state["force-cgroupv1"] as? Boolean ?: false) }, last = true)
             }
             4 -> SelectionContainer {
                 Text(DSSConfig(state["name"].toString(), false, JSONObject(state.toMap()).apply { put("binds", JSONArray(binds)) }).buildCommand("start"), color = Color.Gray, fontSize = 9.sp, fontFamily = localFont.current)
