@@ -11,7 +11,7 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use std::{io::{self, Write}, time::Duration};
-pub fn execute_desktop() -> bool {
+pub fn executeDesktop() -> bool {
     enable_raw_mode().unwrap();
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen, event::EnableMouseCapture).unwrap();
@@ -39,13 +39,13 @@ pub fn execute_desktop() -> bool {
                     KeyCode::Esc => break,
                     KeyCode::Up => selected = (selected + 2) % 3,
                     KeyCode::Down => selected = (selected + 1) % 3,
-                    KeyCode::Enter => { cleanup(&mut terminal); return handle_action(selected); }
+                    KeyCode::Enter => { cleanup(&mut terminal); return handleAction(selected); }
                     _ => {}
                 },
                 Event::Mouse(mouse) => {
                     if let Some(index) = buttons.iter().position(|btn| btn.contains(mouse.column, mouse.row)) {
                         selected = index;
-                        if mouse.kind == MouseEventKind::Up(MouseButton::Left) { cleanup(&mut terminal); return handle_action(index); }
+                        if mouse.kind == MouseEventKind::Up(MouseButton::Left) { cleanup(&mut terminal); return handleAction(index); }
                     }
                 }
                 _ => {}
@@ -55,18 +55,18 @@ pub fn execute_desktop() -> bool {
     cleanup(&mut terminal);
     false
 }
-fn handle_action(index: usize) -> bool {
+fn handleAction(index: usize) -> bool {
     match index {
         0 => {
             let ate = "/data/local/tmp/als/app/chr/UbuntuEnv";
-            if crate::mount::te_mt(ate).is_ok() {
-                crate::on::te_on(&std::path::PathBuf::from(ate));
-                let _ = crate::umount::te_umt(std::path::Path::new(ate));
+            if crate::mount::teMt(ate).is_ok() {
+                crate::on::teOn(&std::path::PathBuf::from(ate));
+                let _ = crate::umount::teUmt(std::path::Path::new(ate));
             }
             true
         }
         1 => { let _ = io::stdout().write_all(b"\x1bc\x1b[2J\x1b[3J\x1b[H"); let _ = io::stdout().flush(); false }
-        2 => { crate::termux::execute_termux(); true }
+        2 => { crate::txc::executeTermux(); true }
         _ => false,
     }
 }
