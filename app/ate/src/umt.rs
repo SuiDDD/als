@@ -1,11 +1,10 @@
 use std::{fs, path::Path, process::Command};
-pub fn teUmt(ateDir: &Path) -> Result<(), Box<dyn std::error::Error>> {
-    let atePath = fs::canonicalize(ateDir)?;
-    let ateStr = atePath.to_str().unwrap();
+pub fn teUmt(envDir: &Path) -> Result<(), Box<dyn std::error::Error>> {
+    let envStr = fs::canonicalize(envDir)?.to_str().unwrap().to_string();
     let mut mounts: Vec<_> = fs::read_to_string("/proc/mounts")?
         .lines()
         .filter_map(|line| line.split_whitespace().nth(1))
-        .filter(|path| path.starts_with(ateStr))
+        .filter(|path| path.starts_with(&envStr))
         .map(String::from)
         .collect();
     mounts.sort_by_key(|path| std::cmp::Reverse(path.len()));
