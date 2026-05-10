@@ -189,9 +189,9 @@ fun DSSCreate(config: DSSConfig? = null, onBack: () -> Unit) {
             2 -> Column {
                 ALSList(stringResource(R.string.rootfs_directory), value = state["rootfs"]?.toString() ?: "", onValueChange = { state["rootfs"] = it; state["rootfs-img"] = "" }, first = true)
                 ALSList(stringResource(R.string.rootfs_image), value = state["rootfs-img"]?.toString() ?: "", onValueChange = { state["rootfs-img"] = it; state["rootfs"] = "" })
-                ALSList(stringResource(R.string.volatile_mode), checked = state["volatile"] == true, onClick = { state["volatile"] = !(state["volatile"] as? Boolean ?: false) })
+                ALSList(stringResource(R.string.volatile_mode), checked = state["volatile"] == true, onClick = { state["volatile"] = !(state["volatile"] as? Boolean ?: false) }, last = true)
                 Spacer(Modifier.height(9.dp))
-                binds.forEachIndexed { i, b -> ALSList(stringResource(R.string.mount_point, i + 1), value = b, onValueChange = { binds[i] = it }, last = i == binds.size - 1) }
+                binds.forEachIndexed { i, b -> ALSList(stringResource(R.string.mount_point, i + 1), value = b, onValueChange = { binds[i] = it }, first = i == 0, last = i == binds.size - 1) }
                 Box(Modifier.fillMaxWidth().padding(9.dp), Alignment.Center) { ALSButton(R.drawable.add, click = { binds.add("") }) }
             }
             3 -> Column {

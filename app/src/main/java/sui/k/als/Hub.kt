@@ -61,7 +61,10 @@ fun Hub(modifier: Modifier = Modifier, onFin: () -> Unit) = Box(
         }
     }
     if (showApp) App() else if (showTTY) active?.let { TTYScreen(it) { TTYIME() } } else if (showTTYHUB) TTYHUB(
-        sessions, { active = it; showTTY = true; showTTYHUB = false }, create
+        sessions,
+        onSelect = { active = it; showTTY = true; showTTYHUB = false },
+        onDelete = { it.session.finishIfRunning() },
+        onCreate = create
     ) else Box(
         Modifier.fillMaxSize(), Alignment.Center
     ) {
