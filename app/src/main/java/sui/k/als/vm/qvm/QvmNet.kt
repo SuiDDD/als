@@ -10,7 +10,7 @@ import sui.k.als.ui.*
 import java.util.*
 
 @Composable
-fun QVMNetwork(state: MutableMap<String, Any>) {
+fun QvmNetwork(state: MutableMap<String, Any>) {
     var showDeviceDiscovery by remember { mutableStateOf(false) }
     var deviceList by remember { mutableStateOf(listOf<String>()) }
     var showBackendSelection by remember { mutableStateOf(false) }
@@ -48,7 +48,7 @@ fun QVMNetwork(state: MutableMap<String, Any>) {
                 stringResource(R.string.port_forwarding),
                 value = ports,
                 last = true,
-                backgrounds = if (ports.isEmpty()) Color.Red else null
+                background = if (ports.isEmpty()) Color.Red else null
             ) { state["ports"] = it }
         } else {
             ALSList(

@@ -7,7 +7,7 @@ import sui.k.als.R
 import sui.k.als.ui.*
 
 @Composable
-fun QVMMemory(state: MutableMap<String, Any>) {
+fun QvmMemory(state: MutableMap<String, Any>) {
     if (state["mem"] == null) state["mem"] = "6G"
     if (state["swiotlb"] == null) state["swiotlb"] = "64M"
     LaunchedEffect(
@@ -42,12 +42,12 @@ fun QVMMemory(state: MutableMap<String, Any>) {
         stringResource(R.string.memory_size),
         value = mem,
         first = true,
-        backgrounds = if (mem.isEmpty()) Color.Red else null,
+        background = if (mem.isEmpty()) Color.Red else null,
         onValueChange = { state["mem"] = it })
     ALSList(
         stringResource(R.string.swiotlb_buffer_size),
         value = sw,
-        backgrounds = if (sw.isEmpty()) Color.Red else null,
+        background = if (sw.isEmpty()) Color.Red else null,
         onValueChange = { state["swiotlb"] = it })
 
     ALSList(stringResource(R.string.prealloc), checked = pre, last = !pre) {
@@ -57,7 +57,7 @@ fun QVMMemory(state: MutableMap<String, Any>) {
         ALSList(
             stringResource(R.string.alloc_size),
             value = ps,
-            backgrounds = if (ps.isEmpty()) Color.Red else null,
+            background = if (ps.isEmpty()) Color.Red else null,
             onValueChange = { state["prealloc_size"] = it })
         ALSList(
             stringResource(R.string.force_alloc), checked = state["force"] == true

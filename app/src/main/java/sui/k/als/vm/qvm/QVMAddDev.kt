@@ -8,7 +8,7 @@ import sui.k.als.R
 import sui.k.als.ui.*
 
 @Composable
-fun QVMAddDev(
+fun QvmAddDev(
     cdroms: SnapshotStateList<MutableMap<String, Any>>,
     disks: SnapshotStateList<MutableMap<String, Any>>,
     networks: SnapshotStateList<MutableMap<String, Any>>,

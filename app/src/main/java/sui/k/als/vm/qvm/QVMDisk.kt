@@ -7,13 +7,13 @@ import sui.k.als.R
 import sui.k.als.ui.*
 
 @Composable
-fun QVMDisk(state: MutableMap<String, Any>) {
+fun QvmDisk(state: MutableMap<String, Any>) {
     val path = state["path"]?.toString() ?: ""
     ALSList(
         stringResource(R.string.disk_path),
         value = path,
         first = true,
-        backgrounds = if (path.isEmpty()) Color.Red else null,
+        background = if (path.isEmpty()) Color.Red else null,
         onValueChange = { state["path"] = it })
     ALSList(
         stringResource(R.string.cache_mode),

@@ -50,16 +50,17 @@ fun Splash(
         }
 
         showSuInput = false
-        if (active == null) internalInstance =
-            createTTYInstance(context, TTYSessionStub(), TTYViewStub())
-        ttySession = (instance ?: internalInstance)?.session
-        launch {
-            delay(90)
-            cmd(su)
-            cmd("clear")
+        if (active == null) {
+            internalInstance = createTTYInstance(context, TTYSessionStub(), TTYViewStub())
+            ttySession = internalInstance?.session
+            launch {
+                delay(90)
+                cmd(su)
+                cmd("clear")
+            }
         }
         showIcon = true
-        delay(300)
+        delay(900)
         onTimeout?.invoke()
     }
 

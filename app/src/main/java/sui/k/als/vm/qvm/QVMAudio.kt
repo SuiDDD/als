@@ -6,7 +6,7 @@ import sui.k.als.R
 import sui.k.als.ui.*
 
 @Composable
-fun QVMAudio(qvmMap: MutableMap<String, Any>) {
+fun QvmAudio(qvmMap: MutableMap<String, Any>) {
     LaunchedEffect(qvmMap["audio"]) {
         qvmMap["audio_cmd"] =
             if (qvmMap["audio"] == 1) "-audiodev aaudio,id=snd0 -device virtio-sound-pci,audiodev=snd0,disable-legacy=on,disable-modern=off " else ""
