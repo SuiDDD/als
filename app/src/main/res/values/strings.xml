@@ -71,4 +71,8 @@
     <string name="volatile_mode">不保存更改</string>
     <string name="xres">水平像素</string>
     <string name="yres">垂直像素</string>
+    <string name="create_disk_image">创建磁盘镜像</string>
+    <string name="image_format">镜像格式</string>
+    <string name="image_size">镜像大小</string>
+    <string name="create">创建</string>
 </resources>

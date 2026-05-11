@@ -57,7 +57,7 @@ object QvmCmd {
             qvmCfg.disk.forEachIndexed { i, d ->
                 if (d.path.isNotEmpty()) {
                     args("-drive", "file=\"${d.path}\",if=none,id=dr_d$i,cache=${d.cache}")
-                    args("-device", "virtio-blk-pci,drive=dr_d$i,bootindex=${d.index ?: (i + 10)}")
+                    args("-device", "virtio-blk-pci,drive=dr_d$i,bootindex=${d.index ?: (i + 2)}")
                 }
             }
             qvmCfg.network.forEachIndexed { i, n ->

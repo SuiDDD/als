@@ -8,7 +8,7 @@ object TTYEnv {
     val env: Array<String> by lazy {
         val systemEnv = System.getenv().toMutableMap()
         systemEnv["TERM"] = "xterm-direct"
-        systemEnv.toSortedMap().map { "${it.key}=${it.value}" }.toTypedArray()
+        systemEnv.map { "${it.key}=${it.value}" }.toTypedArray()
     }
 }
 
