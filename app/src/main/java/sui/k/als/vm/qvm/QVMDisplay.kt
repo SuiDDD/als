@@ -10,7 +10,7 @@ import sui.k.als.ui.*
 import java.util.*
 
 @Composable
-fun QVMDisplay(state: MutableMap<String, Any>) {
+fun QvmDisplay(state: MutableMap<String, Any>) {
     var showDeviceDiscovery by remember { mutableStateOf(false) }
     var deviceList by remember { mutableStateOf(listOf<String>()) }
     LaunchedEffect(state["vnc_port"], state["display_device"], state["xres"], state["yres"]) {
@@ -40,22 +40,25 @@ fun QVMDisplay(state: MutableMap<String, Any>) {
         ALSList(
             stringResource(R.string.xres),
             value = state["xres"]?.toString() ?: "",
-            backgrounds = Color.Red.takeIf {
+            onValueChange = { state["xres"] = it },
+            background = Color.Red.takeIf {
                 (state["xres"]?.toString() ?: "").isEmpty()
-            }) { state["xres"] = it }
+            })
         ALSList(
             stringResource(R.string.yres),
             value = state["yres"]?.toString() ?: "",
-            backgrounds = Color.Red.takeIf {
+            onValueChange = { state["yres"] = it },
+            background = Color.Red.takeIf {
                 (state["yres"]?.toString() ?: "").isEmpty()
-            }) { state["yres"] = it }
+            })
         ALSList(
             stringResource(R.string.vnc_port),
             value = state.getOrPut("vnc_port") { ":0" }.toString(),
+            onValueChange = { state["vnc_port"] = it },
             last = true,
-            backgrounds = Color.Red.takeIf {
+            background = Color.Red.takeIf {
                 state["vnc_port"]?.toString().isNullOrEmpty()
-            }) { state["vnc_port"] = it }
+            })
     }
     ALSList(
         data = deviceList,

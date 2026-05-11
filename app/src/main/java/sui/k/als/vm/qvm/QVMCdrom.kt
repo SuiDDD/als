@@ -12,7 +12,7 @@ import sui.k.als.R
 import sui.k.als.ui.*
 
 @Composable
-fun QVMCdrom(state: MutableMap<String, Any>) {
+fun QvmCdrom(state: MutableMap<String, Any>) {
     val path = state["path"]?.toString() ?: ""
     val index = state["index"]?.toString() ?: ""
     Column {
@@ -28,7 +28,7 @@ fun QVMCdrom(state: MutableMap<String, Any>) {
             stringResource(R.string.cdrom_path),
             value = path,
             first = true,
-            backgrounds = if (path.isEmpty()) Color.Red else null,
+            background = if (path.isEmpty()) Color.Red else null,
             onValueChange = { state["path"] = it })
         ALSList(
             stringResource(R.string.boot_index),

@@ -6,7 +6,7 @@ import sui.k.als.R
 import sui.k.als.ui.*
 
 @Composable
-fun QVMProcessor(state: MutableMap<String, Any>) {
+fun QvmProcessor(state: MutableMap<String, Any>) {
     val cores = state["cores"]?.toString() ?: "$(nproc)"
     val threads = state["threads"]?.toString() ?: "1"
     val sockets = state["sockets"]?.toString() ?: "1"
