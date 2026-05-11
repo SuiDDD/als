@@ -1,72 +1,70 @@
 package sui.k.als.vm.qvm
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.res.*
+import kotlinx.coroutines.*
 import sui.k.als.*
 import sui.k.als.R
 import sui.k.als.ui.*
 import java.util.*
-
 @Composable
 fun QvmNetwork(state: MutableMap<String, Any>) {
-    var showDeviceDiscovery by remember { mutableStateOf(false) }
-    var deviceList by remember { mutableStateOf(listOf<String>()) }
-    var showBackendSelection by remember { mutableStateOf(false) }
+    val showDevDialog = remember { mutableStateOf(false) }
+    val showBackendDialog = remember { mutableStateOf(false) }
+    val showProtoDialog = remember { mutableStateOf(false) }
+    val devList = remember { mutableStateOf(emptyList<String>()) }
+    val scope = rememberCoroutineScope()
     val backendList = listOf("user", "tap")
-    var showProtocolSelection by remember { mutableStateOf(false) }
     val protocolList = listOf("tcp", "udp")
-
     val dev = state["device"]?.toString() ?: "virtio-net-pci"
     val backend = state["backend"]?.toString() ?: "user"
     val protocol = state["protocol"]?.toString() ?: "tcp"
     val ports = state["ports"]?.toString() ?: "2222-:22"
-
+    LaunchedEffect(dev, backend, protocol, ports) {
+        val netStr = if (backend == "user") "-netdev user,id=net0,hostfwd=$protocol::$ports -device $dev,netdev=net0"
+        else "-netdev tap,id=net0 -device $dev,netdev=net0"
+        state["network"] = netStr
+    }
     Column {
-        ALSList(stringResource(R.string.network_device), value = dev, first = true) {
-            val qvmDir = "$alsDir/app/qvm"
-            val discoveryCommand =
-                $$"LD_LIBRARY_PATH=$$qvmDir/libs $$qvmDir/qemu-system-aarch64 -M virt -device help 2>&1 | sed -n '/Network devices:/,/^$/p' | sed '1d' | awk -F'[\\\\\" ,]' '{print $3}'"
-            try {
-                val discoveryProcess =
-                    Runtime.getRuntime().exec(arrayOf(su, "-c", discoveryCommand))
-                deviceList = Scanner(discoveryProcess.inputStream).useDelimiter("\n").asSequence()
-                    .filter { it.isNotBlank() }.toList()
-                showDeviceDiscovery = true
-            } catch (_: Exception) {
+        ALSList(
+            data = stringResource(R.string.network_device),
+            value = dev,
+            first = true,
+            onClick = {
+                scope.launch(Dispatchers.IO) {
+                    val qvmDir = "$alsDir/app/qvm"
+                    val cmd = "LD_LIBRARY_PATH=$qvmDir/libs $qvmDir/qemu-system-aarch64 -M virt -device help 2>&1 | sed -n '/Network devices:/,/^$/p' | sed '1d' | awk -F'[\\\" ,]' '{print $3}'"
+                    runCatching {
+                        val process = Runtime.getRuntime().exec(arrayOf(su, "-c", cmd))
+                        val result = Scanner(process.inputStream).useDelimiter("\n").asSequence().filter { it.isNotBlank() }.toList()
+                        if (result.isNotEmpty()) {
+                            devList.value = result
+                            showDevDialog.value = true
+                        }
+                    }
+                }
             }
-        }
-        ALSList(stringResource(R.string.network_backend), value = backend) {
-            showBackendSelection = true
-        }
+        )
+        ALSList(data = stringResource(R.string.network_backend), value = backend, last = backend != "user", onClick = { showBackendDialog.value = true })
         if (backend == "user") {
+            ALSList(data = stringResource(R.string.network_protocol), value = protocol, onClick = { showProtoDialog.value = true })
             ALSList(
-                stringResource(R.string.network_protocol), value = protocol
-            ) { showProtocolSelection = true }
-            ALSList(
-                stringResource(R.string.port_forwarding),
+                data = stringResource(R.string.port_forwarding),
                 value = ports,
+                onValueChange = { state["ports"] = it },
                 last = true,
-                background = if (ports.isEmpty()) Color.Red else null
-            ) { state["ports"] = it }
-        } else {
-            ALSList(
-                stringResource(R.string.network_backend), value = backend, last = true
-            ) { showBackendSelection = true }
+                background = Color.Red.takeIf { ports.isEmpty() }
+            )
         }
     }
-
-    ALSList(
-        data = deviceList, show = showDeviceDiscovery, onDismiss = { }) {
-        state["device"] = it
+    if (showDevDialog.value) {
+        ALSList(data = devList.value, show = true, onDismiss = { showDevDialog.value = false }, onClick = { state["device"] = it; showDevDialog.value = false })
     }
-    ALSList(
-        data = backendList, show = showBackendSelection, onDismiss = { }) {
-        state["backend"] = it
+    if (showBackendDialog.value) {
+        ALSList(data = backendList, show = true, onDismiss = { showBackendDialog.value = false }, onClick = { state["backend"] = it; showBackendDialog.value = false })
     }
-    ALSList(
-        data = protocolList, show = showProtocolSelection, onDismiss = { }) {
-        state["protocol"] = it
+    if (showProtoDialog.value) {
+        ALSList(data = protocolList, show = true, onDismiss = { showProtoDialog.value = false }, onClick = { state["protocol"] = it; showProtoDialog.value = false })
     }
 }

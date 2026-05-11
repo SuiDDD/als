@@ -1,7 +1,6 @@
 package sui.k.als.tty
 
 import android.content.*
-import android.content.ClipboardManager
 import android.graphics.*
 import android.view.*
 import androidx.compose.foundation.*
@@ -12,56 +11,47 @@ import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.*
 import androidx.compose.ui.platform.*
-import androidx.compose.ui.unit.*
 import androidx.compose.ui.viewinterop.*
 import com.termux.terminal.*
 import com.termux.view.*
-import java.util.concurrent.*
 import java.util.concurrent.atomic.*
+import android.content.ClipboardManager as AndroidClipboardManager
 
-data class TTYInstance(
-    val session: TerminalSession, val view: TerminalView
-)
+data class TTYInstance(val session: TerminalSession, val view: TerminalView)
 
 val LocalSession = staticCompositionLocalOf<TerminalSession?> { null }
-internal var ttySession: TerminalSession? = null
-private val ttyIO = Executors.newSingleThreadExecutor()
-fun cmd(cmd: String) {
-    ttyIO.execute { ttySession?.write("$cmd\n") }
-}
 
 @Composable
 fun TTYScreen(instance: TTYInstance, content: @Composable () -> Unit = {}) {
     val density = LocalDensity.current
-    val termView = instance.view
-    val termSession = instance.session
     var imeHeightPx by remember { mutableIntStateOf(0) }
     val imePadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
     LaunchedEffect(instance) {
-        ttySession = termSession
-        termView.requestFocus()
-        termView.post { termView.onScreenUpdated(); termView.invalidate() }
+        ttySession = instance.session
+        instance.view.requestFocus()
+        instance.view.onScreenUpdated()
     }
-    CompositionLocalProvider(LocalSession provides termSession) {
+    CompositionLocalProvider(LocalSession provides instance.session) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black)
         ) {
             AndroidView(
-                factory = { termView }, modifier = Modifier
+                factory = { instance.view },
+                modifier = Modifier
                     .fillMaxSize()
-                    .padding(
-                        bottom = if (imeHeightPx == 0 || IMEState.isFloating) 0.dp else imePadding + with(
-                            density
-                        ) { imeHeightPx.toDp() }), update = { view -> view.onScreenUpdated() })
+                    .padding(bottom = imePadding + with(density) { imeHeightPx.toDp() }),
+                update = { view -> view.onScreenUpdated() })
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = imePadding)
                     .onGloballyPositioned { layout ->
                         imeHeightPx = layout.size.height
-                    }) { content() }
+                    }) {
+                content()
+            }
         }
     }
 }
@@ -69,7 +59,7 @@ fun TTYScreen(instance: TTYInstance, content: @Composable () -> Unit = {}) {
 fun createTTYInstance(
     context: Context, sessionClient: TTYSessionStub, viewClient: TTYViewStub
 ): TTYInstance {
-    val session = TerminalSession(TTYENV, 9216, sessionClient)
+    val session = TerminalSession(TTYEnv, 9216, sessionClient)
     val view = TerminalView(context, null).apply {
         setLayerType(View.LAYER_TYPE_HARDWARE, null)
         isFocusable = true
@@ -92,18 +82,18 @@ fun createTTYInstance(
 }
 
 open class TTYSessionStub : TerminalSessionClient {
-    private var boundView: TerminalView? = null
-    private val updatePosted = AtomicBoolean(false)
-    fun bindView(view: TerminalView) {
-        boundView = view
+    private var view: TerminalView? = null
+    private val updated = AtomicBoolean(false)
+    fun bindView(targetView: TerminalView) {
+        view = targetView
     }
 
     override fun onTextChanged(session: TerminalSession) {
-        if (updatePosted.compareAndSet(false, true)) {
-            boundView?.post {
-                updatePosted.set(false)
-                boundView?.onScreenUpdated()
-                boundView?.invalidate()
+        if (updated.compareAndSet(false, true)) {
+            view?.post {
+                updated.set(false)
+                view?.onScreenUpdated()
+                view?.invalidate()
             }
         }
     }
@@ -111,27 +101,28 @@ open class TTYSessionStub : TerminalSessionClient {
     override fun onTitleChanged(session: TerminalSession) {}
     override fun onSessionFinished(session: TerminalSession) {}
     override fun onCopyTextToClipboard(session: TerminalSession, text: String) {
-        val context = boundView?.context ?: return
-        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        clipboard.setPrimaryClip(ClipData.newPlainText("T", text))
+        (view?.context?.getSystemService(Context.CLIPBOARD_SERVICE) as? AndroidClipboardManager)?.setPrimaryClip(
+            ClipData.newPlainText("T", text)
+        )
     }
 
     override fun onPasteTextFromClipboard(session: TerminalSession?) {
-        val context = boundView?.context ?: return
-        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        clipboard.primaryClip?.getItemAt(0)?.let { item ->
-            val text = item.coerceToText(context).toString()
-            ttyIO.execute { session?.write(text) }
+        val context = view?.context ?: return
+        val manager = context.getSystemService(Context.CLIPBOARD_SERVICE) as AndroidClipboardManager
+        manager.primaryClip?.getItemAt(0)?.let { item ->
+            ttyIO.execute {
+                session?.write(item.coerceToText(context).toString())
+            }
         }
     }
 
     override fun onBell(session: TerminalSession) {}
     override fun onColorsChanged(session: TerminalSession) {}
     override fun onTerminalCursorStateChange(visible: Boolean) {
-        if (updatePosted.compareAndSet(false, true)) {
-            boundView?.post {
-                updatePosted.set(false)
-                boundView?.onScreenUpdated()
+        if (updated.compareAndSet(false, true)) {
+            view?.post {
+                updated.set(false)
+                view?.onScreenUpdated()
             }
         }
     }
@@ -143,37 +134,37 @@ open class TTYSessionStub : TerminalSessionClient {
     override fun logInfo(tag: String?, msg: String?) {}
     override fun logDebug(tag: String?, msg: String?) {}
     override fun logVerbose(tag: String?, msg: String?) {}
-    override fun logStackTraceWithMessage(tag: String?, msg: String?, e: Exception?) {}
-    override fun logStackTrace(tag: String?, e: Exception?) {}
+    override fun logStackTraceWithMessage(tag: String?, msg: String?, error: Exception?) {}
+    override fun logStackTrace(tag: String?, error: Exception?) {}
 }
 
 open class TTYViewStub : TerminalViewClient {
-    private var boundView: TerminalView? = null
-    private var currentSize = 12f
-    fun bindView(view: TerminalView) {
-        boundView = view
+    private var view: TerminalView? = null
+    private var size = 12f
+    fun bindView(targetView: TerminalView) {
+        view = targetView
     }
 
-    override fun readControlKey() = IMEState.consumeCtrl()
-    override fun readAltKey() = IMEState.consumeAlt()
-    override fun readShiftKey() = IMEState.consumeShift()
-    override fun readFnKey() = false
     override fun onKeyDown(keyCode: Int, event: KeyEvent, session: TerminalSession) =
-        (keyCode == KeyEvent.KEYCODE_BACK)
+        keyCode == KeyEvent.KEYCODE_BACK
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent) = false
-    override fun onCodePoint(codePoint: Int, ctrlDown: Boolean, session: TerminalSession) = false
     override fun onSingleTapUp(event: MotionEvent) {}
     override fun onLongPress(event: MotionEvent) = false
-    override fun onScale(scaleFactor: Float): Float {
-        val newSize = (currentSize * scaleFactor).coerceIn(12f, 270f)
-        if (newSize != currentSize) {
-            currentSize = newSize
-            boundView?.post { boundView?.setTextSize(currentSize.toInt()) }
+    override fun onScale(factor: Float): Float {
+        val next = (size * factor).coerceIn(12f, 270f)
+        if (next != size) {
+            size = next
+            view?.post { view?.setTextSize(size.toInt()) }
         }
         return 1f
     }
 
+    override fun onCodePoint(codePoint: Int, ctrlDown: Boolean, session: TerminalSession) = false
+    override fun readControlKey() = IMEState.consumeCtrl()
+    override fun readAltKey() = IMEState.consumeAlt()
+    override fun readShiftKey() = IMEState.consumeShift()
+    override fun readFnKey() = false
     override fun shouldEnforceCharBasedInput() = true
     override fun shouldBackButtonBeMappedToEscape() = true
     override fun shouldUseCtrlSpaceWorkaround() = false
@@ -185,6 +176,6 @@ open class TTYViewStub : TerminalViewClient {
     override fun logInfo(tag: String?, msg: String?) {}
     override fun logDebug(tag: String?, msg: String?) {}
     override fun logVerbose(tag: String?, msg: String?) {}
-    override fun logStackTraceWithMessage(tag: String?, msg: String?, e: Exception?) {}
-    override fun logStackTrace(tag: String?, e: Exception?) {}
+    override fun logStackTraceWithMessage(tag: String?, msg: String?, error: Exception?) {}
+    override fun logStackTrace(tag: String?, error: Exception?) {}
 }
