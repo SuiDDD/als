@@ -29,7 +29,7 @@ fun Hub(modifier: Modifier = Modifier, onFin: () -> Unit) = Box(
     var sessions by remember { mutableStateOf(emptyList<TTYInstance>()) }
     var active by remember { mutableStateOf<TTYInstance?>(null) }
     var showTTY by remember { mutableStateOf(false) }
-    var showTTYHUB by remember { mutableStateOf(false) }
+    var showTTYHub by remember { mutableStateOf(false) }
     var showApp by remember { mutableStateOf(false) }
     val close =
         { sessions.forEach { it.session.finishIfRunning() }; sessions = emptyList(); active = null }
@@ -39,7 +39,7 @@ fun Hub(modifier: Modifier = Modifier, onFin: () -> Unit) = Box(
                 sessions = sessions.filter { it.session != session }
                 if (active?.session == session) active = sessions.lastOrNull()
                 if (active == null) {
-                    showTTY = false; showTTYHUB = sessions.isNotEmpty()
+                    showTTY = false; showTTYHub = sessions.isNotEmpty()
                 }
             }
         }, object : TTYViewStub() {
@@ -50,19 +50,19 @@ fun Hub(modifier: Modifier = Modifier, onFin: () -> Unit) = Box(
                 }
             }
         }).also { scope.launch { delay(90); cmd(su); delay(90); cmd("$alsDir/app/ate") } }
-        sessions = sessions + instance; active = instance; showTTY = true; showTTYHUB = false
+        sessions = sessions + instance; active = instance; showTTY = true; showTTYHub = false
     }
     DisposableEffect(Unit) { onDispose(close) }
     BackHandler {
         if (showTTY) {
-            showTTY = false; showTTYHUB = true
+            showTTY = false; showTTYHub = true
         } else {
-            showTTYHUB = false; showApp = false
+            showTTYHub = false; showApp = false
         }
     }
-    if (showApp) App() else if (showTTY) active?.let { TTYScreen(it) { TTYIME() } } else if (showTTYHUB) TTYHUB(
+    if (showApp) App() else if (showTTY) active?.let { TTYScreen(it) { TTYIME() } } else if (showTTYHub) TTYHub(
         sessions,
-        onSelect = { active = it; showTTY = true; showTTYHUB = false },
+        onSelect = { active = it; showTTY = true; showTTYHub = false },
         onDelete = { it.session.finishIfRunning() },
         onCreate = create
     ) else Box(
@@ -71,7 +71,7 @@ fun Hub(modifier: Modifier = Modifier, onFin: () -> Unit) = Box(
         Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
             ALSButton(R.drawable.arrow_forward) { showApp = true }
             ALSButton(R.drawable.terminal) {
-                if (sessions.isEmpty()) create() else showTTYHUB = true
+                if (sessions.isEmpty()) create() else showTTYHub = true
             }
             ALSButton(R.drawable.power) { close(); onFin(); (ctx as? Activity)?.finishAffinity() }
         }

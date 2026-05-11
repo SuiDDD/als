@@ -11,7 +11,7 @@ import sui.k.als.R
 import sui.k.als.ui.*
 
 @Composable
-fun TTYHUB(
+fun TTYHub(
     sessions: List<TTYInstance>,
     onSelect: (TTYInstance) -> Unit,
     onDelete: (TTYInstance) -> Unit,
