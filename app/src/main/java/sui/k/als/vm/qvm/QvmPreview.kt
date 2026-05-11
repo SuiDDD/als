@@ -1,4 +1,5 @@
 package sui.k.als.vm.qvm
+
 import androidx.compose.foundation.text.selection.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,6 +23,7 @@ data class QvmCfg(
     val audioEnabled: Boolean = false,
     val usbEnabled: Boolean = false
 )
+
 data class StorageDevice(val path: String, val index: Int? = null, val cache: String = "unsafe")
 data class NetworkConfig(
     val backend: String = "user",
@@ -29,6 +31,7 @@ data class NetworkConfig(
     val ports: String = "2222-:22",
     val device: String = "virtio-net-pci"
 )
+
 object QvmCmd {
     fun build(qvmCfg: QvmCfg): String {
         val cmdArgs = mutableListOf<String>()
@@ -42,7 +45,12 @@ object QvmCmd {
             args("-smp", qvmCfg.smp, "-m", qvmCfg.mem)
             args("-object", "arm-confidential-guest,id=prot0,swiotlb-size=${qvmCfg.swiotlb}")
             if (qvmCfg.prealloc) {
-                val mb = if (qvmCfg.preallocSize.endsWith("G", true)) "${qvmCfg.preallocSize.removeSuffix("G").toInt() * 1024}M" else qvmCfg.preallocSize
+                val mb = if (qvmCfg.preallocSize.endsWith(
+                        "G", true
+                    )
+                ) "${
+                    qvmCfg.preallocSize.removeSuffix("G").toInt() * 1024
+                }M" else qvmCfg.preallocSize
                 args("-object", "memory-backend-ram,id=mem,size=$mb,prealloc=on")
                 if (qvmCfg.forcePrealloc) add("-mem-prealloc")
                 if (qvmCfg.lockMemory) args("-overcommit", "mem-lock=on")
@@ -64,9 +72,12 @@ object QvmCmd {
                 args("-netdev", "${n.backend},id=net$i,hostfwd=${n.protocol}::${n.ports}")
                 args("-device", "${n.device},netdev=net$i")
             }
-            val gpu = qvmCfg.resolution?.let { "virtio-gpu-pci,xres=${it.first},yres=${it.second}" } ?: "virtio-gpu-pci"
+            val gpu = qvmCfg.resolution?.let { "virtio-gpu-pci,xres=${it.first},yres=${it.second}" }
+                ?: "virtio-gpu-pci"
             args("-device", gpu, "-vnc", qvmCfg.vncPort)
-            if (qvmCfg.audioEnabled) args("-audiodev", "aaudio,id=snd0", "-device", "virtio-sound-pci,audiodev=snd0")
+            if (qvmCfg.audioEnabled) args(
+                "-audiodev", "aaudio,id=snd0", "-device", "virtio-sound-pci,audiodev=snd0"
+            )
             if (qvmCfg.usbEnabled) {
                 args("-device", "qemu-xhci,id=usb,bus=pcie.0,addr=0x4")
                 args("-device", "usb-tablet,bus=usb.0,port=1")
@@ -77,6 +88,7 @@ object QvmCmd {
         return cmdArgs.joinToString(" ")
     }
 }
+
 @Composable
 fun QvmPreview(qvmCfg: QvmCfg) {
     val cmd = remember(qvmCfg) { QvmCmd.build(qvmCfg) }

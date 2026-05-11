@@ -1,4 +1,4 @@
-﻿package sui.k.als
+package sui.k.als
 
 import androidx.activity.compose.*
 import androidx.compose.foundation.*
@@ -9,12 +9,11 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.unit.*
 import sui.k.als.chr.qcom.*
-import sui.k.als.dss.DSS
+import sui.k.als.dss.*
 import sui.k.als.set.*
 import sui.k.als.tty.*
 import sui.k.als.ui.*
-import sui.k.als.vm.qvm.Qvm
-import sui.k.als.vm.qvm.QvmImg
+import sui.k.als.vm.qvm.*
 
 @Composable
 fun App() {
@@ -49,7 +48,7 @@ fun App() {
             TTYScreen(activeTTY!!) { TTYIME() }
         } else when {
             showQvm -> Qvm { showQvm = false }
-            showQvmImg -> QvmImg()
+            showQvmImg -> QvmImg { showQvmImg = false }
             showDSS -> DSS { showDSS = false }
             showChr -> Chr(onTTYCreated = { activeTTY = it }, scope = scope)
             showSet -> Set { showSet = false }

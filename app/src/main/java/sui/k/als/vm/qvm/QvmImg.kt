@@ -1,71 +1,118 @@
 package sui.k.als.vm.qvm
 
+import androidx.activity.compose.*
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import sui.k.als.R
-import sui.k.als.su
-import sui.k.als.ui.ALSButton
-import sui.k.als.ui.ALSList
+import androidx.compose.ui.*
+import androidx.compose.ui.unit.*
+import kotlinx.coroutines.*
+import sui.k.als.*
+import sui.k.als.ui.*
 
 @Composable
-fun QvmImg() {
-    var path by remember { mutableStateOf("") }
-    var size by remember { mutableStateOf("20G") }
-    var format by remember { mutableStateOf("qcow2") }
-    val formats = listOf("qcow2", "raw")
-    var showFormatSelector by remember { mutableStateOf(false) }
+fun QvmImg(onExit: () -> Unit) {
+    var activeScreen by remember { mutableIntStateOf(-1) }
+    var showPreview by remember { mutableStateOf<String?>(null) }
+    var executing by remember { mutableStateOf(false) }
+    var output by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
 
-    Column(Modifier.fillMaxWidth()) {
-        ALSList(
-            data = stringResource(R.string.disk_path),
-            value = path,
-            first = true,
-            onValueChange = { path = it }
-        )
-        ALSList(
-            data = stringResource(R.string.image_size),
-            value = size,
-            onValueChange = { size = it }
-        )
-        ALSList(
-            data = stringResource(R.string.image_format),
-            value = format,
-            last = true,
-            onClick = { showFormatSelector = true }
-        )
+    BackHandler {
+        when {
+            showPreview != null -> showPreview = null
+            activeScreen >= 0 -> activeScreen = -1
+            else -> onExit()
+        }
+    }
 
-        Spacer(Modifier.height(18.dp))
+    val menus = listOf(
+        "创建镜像",
+        "查看信息",
+        "调整大小",
+        "转换格式",
+        "检查镜像",
+        "重设基底",
+        "快照管理",
+        "修改选项",
+        "提交变更",
+        "比较镜像",
+        "测量大小",
+        "映射数据"
+    )
 
-        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            ALSButton(R.drawable.add) {
-                if (path.isNotEmpty() && size.isNotEmpty()) {
-                    scope.launch(Dispatchers.IO) {
-                        try {
-                            val cmd = "LD_LIBRARY_PATH=$qvmDir/libs $qvmDir/qemu-img create -f $format \"$path\" $size"
-                            Runtime.getRuntime().exec(arrayOf(su, "-c", cmd)).waitFor()
-                        } catch (_: Exception) { }
-                    }
-                }
+    fun execute(cmdOptions: String) {
+        if (cmdOptions.isBlank()) return
+        executing = true
+        output = ""
+        scope.launch(Dispatchers.IO) {
+            try {
+                val fullCmd = "LD_LIBRARY_PATH=$qvmDir/libs $qvmDir/qemu-img $cmdOptions"
+                val proc = Runtime.getRuntime().exec(arrayOf(su, "-c", fullCmd))
+                val stdOut = proc.inputStream.bufferedReader().readText()
+                val stdErr = proc.errorStream.bufferedReader().readText()
+                output = (stdOut + "\n" + stdErr).trim().ifEmpty { "Command executed." }
+            } catch (e: Exception) {
+                output = "Error: ${e.message}"
+            } finally {
+                executing = false
             }
         }
     }
 
-    if (showFormatSelector) {
-        ALSList(
-            data = formats,
-            show = true,
-            onDismiss = { showFormatSelector = false },
-            onClick = {
-                format = it
-                showFormatSelector = false
+    if (showPreview != null) {
+        QvmImgPreview(
+            cmdOptions = showPreview!!,
+            onDismiss = { showPreview = null },
+            onExecute = { cmd ->
+                showPreview = null
+                execute(cmd)
             }
         )
+    } else if (activeScreen >= 0) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(9.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            ALSList(data = menus[activeScreen], value = null, first = true, onClick = { activeScreen = -1 })
+            Spacer(Modifier.height(9.dp))
+            when (activeScreen) {
+                0 -> QvmImgCreate(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                1 -> QvmImgInfo(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                2 -> QvmImgResize(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                3 -> QvmImgConvert(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                4 -> QvmImgCheck(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                5 -> QvmImgRebase(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                6 -> QvmImgSnapshot(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                7 -> QvmImgAmend(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                8 -> QvmImgCommit(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                9 -> QvmImgCompare(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                10 -> QvmImgMeasure(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                11 -> QvmImgMap(onPreview = { showPreview = it }, onExecute = { execute(it) })
+            }
+        }
+    } else {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(9.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            menus.forEachIndexed { idx, name ->
+                ALSList(
+                    data = name,
+                    value = null,
+                    first = idx == 0,
+                    last = idx == menus.size - 1,
+                    onClick = { activeScreen = idx }
+                )
+            }
+        }
+    }
+
+    if (output.isNotEmpty() || executing) {
+        QvmImgOutput(output = output, executing = executing, onClear = { output = "" })
     }
 }
