@@ -54,7 +54,7 @@ fun QvmCreate(config: QvmConfig? = null, onBack: () -> Unit) {
                 list.add(map)
             }
         } else if (config == null) {
-            list.add(mutableStateMapOf("path" to "", "cache" to "unsafe", "index" to 10))
+            list.add(mutableStateMapOf("path" to "", "cache" to "unsafe", "index" to 2))
         }
         list
     }
