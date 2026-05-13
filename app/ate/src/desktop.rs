@@ -23,12 +23,12 @@ pub fn executeDesktop() -> bool {
                 let [_, inr, _] = Layout::horizontal([Constraint::Fill(1), Constraint::Length(30), Constraint::Fill(1)]).areas(mid);
                 f.render_widget(Block::new().bg(Color::Black), f.area());
                 buttons = Layout::vertical([Constraint::Length(3), Constraint::Length(1), Constraint::Length(3), Constraint::Length(1), Constraint::Length(3)]).split(inr).iter().step_by(2).copied().collect();
-                for (i, n) in ["UbuntuEnv", "SystemEnv", "TermuxEnv"].iter().enumerate() {
+                for (i, n) in ["ExtendEnv", "SystemEnv", "TermuxEnv"].iter().enumerate() {
                     let s = if selected == i { Style::new().fg(Color::Rgb(233, 84, 32)) } else { Style::new() };
                     f.render_widget(Block::bordered().border_type(BorderType::Rounded).border_style(s), buttons[i]);
                     f.render_widget(Paragraph::new(*n).alignment(Alignment::Center).style(s.add_modifier(Modifier::BOLD)), buttons[i].inner(Margin { horizontal: 0, vertical: 1 }));
                 }
-                f.render_widget(Paragraph::new("↑↓键选择 Enter/点击执行 ESC退出").alignment(Alignment::Center).fg(Color::DarkGray), bot);
+                f.render_widget(Paragraph::new("↑↓选择 Enter/点击执行 ESC退出").alignment(Alignment::Center).fg(Color::DarkGray), bot);
             }).ok();
             redraw = false;
         }
