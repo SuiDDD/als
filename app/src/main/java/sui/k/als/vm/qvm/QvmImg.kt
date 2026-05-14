@@ -11,7 +11,6 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.*
 import kotlinx.coroutines.*
 import sui.k.als.*
-import androidx.compose.material3.*
 import sui.k.als.ui.*
 @Composable
 fun QvmImg(onExit: () -> Unit) {
@@ -59,7 +58,7 @@ fun QvmImg(onExit: () -> Unit) {
             Column(
                 Modifier
                     .fillMaxHeight()
-                    .width(160.dp)
+                    .weight(0.3f)
                     .background(Color(0xFF2D2D2D))
                     .padding(vertical = 8.dp)
             ) {
@@ -84,14 +83,13 @@ fun QvmImg(onExit: () -> Unit) {
                     }
                 }
             }
-            Box(Modifier.weight(1f).fillMaxHeight().clip(RectangleShape)) {
+            Box(Modifier.weight(0.7f).fillMaxHeight().clip(RectangleShape)) {
                 Column(
                     Modifier
                         .fillMaxSize()
                         .padding(16.dp)
                         .verticalScroll(rememberScrollState())
                 ) {
-                    Text(menus[activeScreen], fontSize = 20.sp, color = Color.White, modifier = Modifier.padding(bottom = 16.dp))
                     when (activeScreen) {
                         0 -> QvmImgCreate(onPreview = { showPreview = it }, onExecute = { execute(it) })
                         1 -> QvmImgInfo(onPreview = { showPreview = it }, onExecute = { execute(it) })
