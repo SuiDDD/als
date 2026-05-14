@@ -1,4 +1,4 @@
-name: Kotlin Android Build
+name: Kotlin Android 构建
 
 on:
   push:
@@ -14,14 +14,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        name: 检出代码
 
-      - name: Set up JDK 25
+      - name: 配置 JDK 25
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 25
 
-      - name: Cache Gradle
+      - name: 缓存 Gradle
         uses: actions/cache@v3
         with:
           path: |
@@ -30,11 +31,11 @@ jobs:
           key: gradle-${{ runner.os }}-${{ hashFiles('**/gradle-wrapper.properties') }}
           restore-keys: gradle-${{ runner.os }}-
 
-      - name: Build Debug APK
+      - name: 构建 APK
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v3
+      - name: 上传 APK
+        uses: actions/upload-artifact@v4
         with:
           name: app-debug
           path: app/build/outputs/apk/debug/app-debug.apk
