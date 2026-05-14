@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.*
 import kotlinx.coroutines.*
 import sui.k.als.*
+import androidx.compose.material3.*
 import sui.k.als.ui.*
 @Composable
 fun QvmImg(onExit: () -> Unit) {
