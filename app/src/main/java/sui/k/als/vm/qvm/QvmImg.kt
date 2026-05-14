@@ -1,46 +1,31 @@
 package sui.k.als.vm.qvm
-
 import androidx.activity.compose.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.*
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.draw.*
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.*
 import kotlinx.coroutines.*
 import sui.k.als.*
 import sui.k.als.ui.*
-
 @Composable
 fun QvmImg(onExit: () -> Unit) {
-    var activeScreen by remember { mutableIntStateOf(-1) }
+    var activeScreen by remember { mutableIntStateOf(0) }
     var showPreview by remember { mutableStateOf<String?>(null) }
     var executing by remember { mutableStateOf(false) }
     var output by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
-
     BackHandler {
         when {
             showPreview != null -> showPreview = null
-            activeScreen >= 0 -> activeScreen = -1
             else -> onExit()
         }
     }
-
-    val menus = listOf(
-        "创建镜像",
-        "查看信息",
-        "调整大小",
-        "转换格式",
-        "检查镜像",
-        "重设基底",
-        "快照管理",
-        "修改选项",
-        "提交变更",
-        "比较镜像",
-        "测量大小",
-        "映射数据"
-    )
-
+    val menus = listOf("创建镜像","查看信息","调整大小","转换格式","检查镜像","重设基底","快照管理","修改选项","提交变更","比较镜像","测量大小","映射数据")
     fun execute(cmdOptions: String) {
         if (cmdOptions.isBlank()) return
         executing = true
@@ -59,7 +44,6 @@ fun QvmImg(onExit: () -> Unit) {
             }
         }
     }
-
     if (showPreview != null) {
         QvmImgPreview(
             cmdOptions = showPreview!!,
@@ -69,49 +53,62 @@ fun QvmImg(onExit: () -> Unit) {
                 execute(cmd)
             }
         )
-    } else if (activeScreen >= 0) {
-        Column(
-            Modifier
-                .fillMaxSize()
-                .padding(9.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            ALSList(data = menus[activeScreen], value = null, first = true, onClick = { activeScreen = -1 })
-            Spacer(Modifier.height(9.dp))
-            when (activeScreen) {
-                0 -> QvmImgCreate(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                1 -> QvmImgInfo(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                2 -> QvmImgResize(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                3 -> QvmImgConvert(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                4 -> QvmImgCheck(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                5 -> QvmImgRebase(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                6 -> QvmImgSnapshot(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                7 -> QvmImgAmend(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                8 -> QvmImgCommit(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                9 -> QvmImgCompare(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                10 -> QvmImgMeasure(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                11 -> QvmImgMap(onPreview = { showPreview = it }, onExecute = { execute(it) })
-            }
-        }
     } else {
-        Column(
-            Modifier
-                .fillMaxSize()
-                .padding(9.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            menus.forEachIndexed { idx, name ->
-                ALSList(
-                    data = name,
-                    value = null,
-                    first = idx == 0,
-                    last = idx == menus.size - 1,
-                    onClick = { activeScreen = idx }
+        Row(Modifier.fillMaxSize().background(Color(0xFF1E1E1E))) {
+            Column(
+                Modifier
+                    .fillMaxHeight()
+                    .width(160.dp)
+                    .background(Color(0xFF2D2D2D))
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(
+                    "QVM 映像工具",
+                    color = Color.Gray,
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
                 )
+                menus.forEachIndexed { idx, name ->
+                    val isSelected = activeScreen == idx
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(if (isSelected) Color(0xFF3875D7) else Color.Transparent)
+                            .clickable { activeScreen = idx }
+                            .padding(horizontal = 8.dp, vertical = 6.dp)
+                    ) {
+                        Text(name, color = if (isSelected) Color.White else Color(0xFFE0E0E0), fontSize = 13.sp)
+                    }
+                }
+            }
+            Box(Modifier.weight(1f).fillMaxHeight().clip(RectangleShape)) {
+                Column(
+                    Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Text(menus[activeScreen], fontSize = 20.sp, color = Color.White, modifier = Modifier.padding(bottom = 16.dp))
+                    when (activeScreen) {
+                        0 -> QvmImgCreate(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                        1 -> QvmImgInfo(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                        2 -> QvmImgResize(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                        3 -> QvmImgConvert(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                        4 -> QvmImgCheck(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                        5 -> QvmImgRebase(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                        6 -> QvmImgSnapshot(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                        7 -> QvmImgAmend(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                        8 -> QvmImgCommit(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                        9 -> QvmImgCompare(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                        10 -> QvmImgMeasure(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                        11 -> QvmImgMap(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                    }
+                }
             }
         }
     }
-
     if (output.isNotEmpty() || executing) {
         QvmImgOutput(output = output, executing = executing, onClear = { output = "" })
     }
