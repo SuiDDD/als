@@ -1,9 +1,10 @@
 package sui.k.als.vm.qvm
+
 import androidx.activity.compose.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.*
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.*
@@ -11,7 +12,7 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.*
 import kotlinx.coroutines.*
 import sui.k.als.*
-import sui.k.als.ui.*
+
 @Composable
 fun QvmImg(onExit: () -> Unit) {
     var activeScreen by remember { mutableIntStateOf(0) }
@@ -25,7 +26,21 @@ fun QvmImg(onExit: () -> Unit) {
             else -> onExit()
         }
     }
-    val menus = listOf("创建镜像","查看信息","调整大小","转换格式","检查镜像","重设基底","快照管理","修改选项","提交变更","比较镜像","测量大小","映射数据")
+    val menus = listOf(
+        "创建镜像",
+        "查看信息",
+        "调整大小",
+        "转换格式",
+        "检查镜像",
+        "重设基底",
+        "快照管理",
+        "修改选项",
+        "提交变更",
+        "比较镜像",
+        "测量大小",
+        "映射数据"
+    )
+
     fun execute(cmdOptions: String) {
         if (cmdOptions.isBlank()) return
         executing = true
@@ -51,10 +66,13 @@ fun QvmImg(onExit: () -> Unit) {
             onExecute = { cmd ->
                 showPreview = null
                 execute(cmd)
-            }
-        )
+            })
     } else {
-        Row(Modifier.fillMaxSize().background(Color(0xFF1E1E1E))) {
+        Row(
+            Modifier
+                .fillMaxSize()
+                .background(Color(0xFF1E1E1E))
+        ) {
             Column(
                 Modifier
                     .fillMaxHeight()
@@ -77,13 +95,21 @@ fun QvmImg(onExit: () -> Unit) {
                             .clip(RoundedCornerShape(6.dp))
                             .background(if (isSelected) Color(0xFF3875D7) else Color.Transparent)
                             .clickable { activeScreen = idx }
-                            .padding(horizontal = 8.dp, vertical = 6.dp)
-                    ) {
-                        Text(name, color = if (isSelected) Color.White else Color(0xFFE0E0E0), fontSize = 13.sp)
+                            .padding(horizontal = 8.dp, vertical = 6.dp)) {
+                        Text(
+                            name,
+                            color = if (isSelected) Color.White else Color(0xFFE0E0E0),
+                            fontSize = 13.sp
+                        )
                     }
                 }
             }
-            Box(Modifier.weight(0.7f).fillMaxHeight().clip(RectangleShape)) {
+            Box(
+                Modifier
+                    .weight(0.7f)
+                    .fillMaxHeight()
+                    .clip(RectangleShape)
+            ) {
                 Column(
                     Modifier
                         .fillMaxSize()
@@ -91,18 +117,53 @@ fun QvmImg(onExit: () -> Unit) {
                         .verticalScroll(rememberScrollState())
                 ) {
                     when (activeScreen) {
-                        0 -> QvmImgCreate(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                        1 -> QvmImgInfo(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                        2 -> QvmImgResize(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                        3 -> QvmImgConvert(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                        4 -> QvmImgCheck(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                        5 -> QvmImgRebase(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                        6 -> QvmImgSnapshot(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                        7 -> QvmImgAmend(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                        8 -> QvmImgCommit(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                        9 -> QvmImgCompare(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                        10 -> QvmImgMeasure(onPreview = { showPreview = it }, onExecute = { execute(it) })
-                        11 -> QvmImgMap(onPreview = { showPreview = it }, onExecute = { execute(it) })
+                        0 -> QvmImgCreate(
+                            onPreview = { showPreview = it },
+                            onExecute = { execute(it) })
+
+                        1 -> QvmImgInfo(
+                            onPreview = { showPreview = it },
+                            onExecute = { execute(it) })
+
+                        2 -> QvmImgResize(
+                            onPreview = { showPreview = it },
+                            onExecute = { execute(it) })
+
+                        3 -> QvmImgConvert(
+                            onPreview = { showPreview = it },
+                            onExecute = { execute(it) })
+
+                        4 -> QvmImgCheck(
+                            onPreview = { showPreview = it },
+                            onExecute = { execute(it) })
+
+                        5 -> QvmImgRebase(
+                            onPreview = { showPreview = it },
+                            onExecute = { execute(it) })
+
+                        6 -> QvmImgSnapshot(
+                            onPreview = { showPreview = it },
+                            onExecute = { execute(it) })
+
+                        7 -> QvmImgAmend(
+                            onPreview = { showPreview = it },
+                            onExecute = { execute(it) })
+
+                        8 -> QvmImgCommit(
+                            onPreview = { showPreview = it },
+                            onExecute = { execute(it) })
+
+                        9 -> QvmImgCompare(
+                            onPreview = { showPreview = it },
+                            onExecute = { execute(it) })
+
+                        10 -> QvmImgMeasure(
+                            onPreview = { showPreview = it },
+                            onExecute = { execute(it) })
+
+                        11 -> QvmImgMap(
+                            onPreview = { showPreview = it },
+                            onExecute = { execute(it) })
                     }
                 }
             }
